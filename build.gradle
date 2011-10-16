@@ -1,0 +1,59 @@
+apply plugin: 'java'
+
+yeti_project_root = "$project.projectDir/.."
+
+dependencies {
+    compile ':asm:3.1r'
+    testCompile 'junit:junit:4.10',
+                'mockit:jmockit:0.999.10'
+}
+
+repositories {
+    flatDir name: 'asm jar directory', dirs: yeti_project_root
+    mavenRepo urls: "http://jmockit.googlecode.com/svn/maven-repo"
+    mavenCentral()
+}
+
+// IntelliJ IDEA configuration sync
+task intellijSync << {
+    description = 'Add gradle dependecies to IntelliJ project library'
+
+    //Had to adjust this from the base script since the .idea directory is one dir up from the
+    //gradle build file
+    final def librariesDir = new File("$yeti_project_root/.idea${File.separator}libraries")
+    librariesDir.mkdirs()
+
+    final def userHomeGradle = project.gradle.gradleUserHomeDir
+    println "In the IntelliJ Path Variable Preferences, set the USER_HOME_GRADLE variable to '$userHomeGradle.path'"
+
+    def makeJarList = { path ->
+        path.split(File.pathSeparator).collect {
+            it.replaceAll userHomeGradle.path, "\\\$USER_HOME_GRADLE\\\$"
+        }.collect {
+            it.replaceAll yeti_project_root, "\\\$PROJECT_DIR\\\$"
+        }
+    }
+    final def compileJars = makeJarList(configurations.compile.asPath)
+    final def testJars = makeJarList(configurations.testCompile.asPath) - compileJars
+
+    def createLibrary = { fileName, libraryName, jars ->
+        final def gradleLibXml = new File(librariesDir, fileName)
+        gradleLibXml.write """
+<component name="libraryTable">
+  <library name="$libraryName"/>
+</component>"""
+        final def xmlRoot = new XmlParser().parse(gradleLibXml)
+        final def classesNode = xmlRoot.library[0].appendNode('CLASSES')
+
+        jars.each { jar ->
+            classesNode.appendNode('root', [url: "jar://$jar!/"])
+        }
+
+        def writer = new StringWriter()
+        new XmlNodePrinter(new PrintWriter(writer)).print(xmlRoot)
+        gradleLibXml.write writer.toString()
+        println "File '${gradleLibXml.path}' updated"
+    }
+    createLibrary 'Gradle_Libraries.xml', 'Gradle Libraries', compileJars
+    createLibrary 'Gradle_Test_Libraries.xml', 'Gradle Test Libraries', testJars
+}
