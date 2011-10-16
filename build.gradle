@@ -1,30 +1,83 @@
 apply plugin: 'java'
 
-yeti_project_root = "$project.projectDir/.."
-
-dependencies {
-    compile ':asm:3.1r'
-    testCompile 'junit:junit:4.10',
-                'mockit:jmockit:0.999.10'
-}
+yeti_project_root = "$project.projectDir"
 
 repositories {
-    flatDir name: 'asm jar directory', dirs: yeti_project_root
+    flatDir name: 'asm jar directory', dirs: "$buildDir/libs"
     mavenRepo urls: "http://jmockit.googlecode.com/svn/maven-repo"
     mavenCentral()
 }
 
-// IntelliJ IDEA configuration sync
-task intellijSync << {
-    description = 'Add gradle dependecies to IntelliJ project library'
+dependencies {
+    compile     asmRenamedJarDependency   //Must run renameAsm first to generate this jar
+    testCompile 'junit:junit:4.10',
+                'mockit:jmockit:0.999.10'
+}
 
-    //Had to adjust this from the base script since the .idea directory is one dir up from the
-    //gradle build file
+/**************************** Rename classes in ASM jar ******************************/
+buildscript {
+// Properties involved with renaming the classes in the ASM jar.
+    renameClassDir =            "$project.buildDir/special/rename/classes"
+    asmJarDir =                 "$project.gradle.gradleUserHomeDir/cache/~mzz/asm/jars"
+    asmJarName =                'asm-3.1.jar'
+    asmJarDependency =          '~mzz:asm:3.1'
+    asmRenamedJarName =         'asm-3.1r.jar'
+    asmRenamedJarDependency =   '~mzz:asm:3.1r'
+
+    repositories {
+        //This doesn't actually download the jar, as the URL doesn't allow directory listings. But
+        //at least it checks the dependency and creates the right directory in the local gradle cache
+        //and we're declaring it as an explicit dependency.
+        add(new org.apache.ivy.plugins.resolver.URLResolver()) {
+                    name = "Madis' ASM jar location"
+                addArtifactPattern 'http://linux.ee/[organisation]/[module]-[revision].[ext]'
+        }
+    }
+    dependencies { classpath asmJarDependency }
+}
+
+
+configurations { asmCompile }
+dependencies { asmCompile asmJarDependency }
+
+sourceSets {
+    rename {
+        java {
+            srcDir 'src/special'
+            include 'yeti/lang/Rename.java'
+            compileClasspath = configurations.asmCompile
+            classesDir = new File(renameClassDir)
+        }
+    }
+}
+
+task downloadAsm {
+    mkdir asmJarDir
+    ant.get(src: "http://linux.ee/~mzz/$asmJarName", dest: asmJarDir, skipexisting: true, verbose: true)
+}
+
+compileRenameJava.dependsOn downloadAsm
+
+task renameAsm(dependsOn: compileRenameJava) {
+    description = 'Renames class files in ASM jar and generates a new one'
+    mkdir "$buildDir/libs"
+    ant.java(classname: "yeti.lang.Rename", failonerror: true) {
+        classpath(path: renameClassDir)
+        arg(value: "$asmJarDir/$asmJarName")
+        arg(value: "$buildDir/libs/$asmRenamedJarName")
+    }
+}
+
+// IntelliJ IDEA configuration sync
+task intellijSync {
+    description = "Adds gradle dependecies to IntelliJ project library"
+
     final def librariesDir = new File("$yeti_project_root/.idea${File.separator}libraries")
     librariesDir.mkdirs()
 
     final def userHomeGradle = project.gradle.gradleUserHomeDir
-    println "In the IntelliJ Path Variable Preferences, set the USER_HOME_GRADLE variable to '$userHomeGradle.path'"
+    println """If you haven't done so already, in the IntelliJ Path Variable Preferences,
+                set the USER_HOME_GRADLE variable to '$userHomeGradle.path'"""
 
     def makeJarList = { path ->
         path.split(File.pathSeparator).collect {

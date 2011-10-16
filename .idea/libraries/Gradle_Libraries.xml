@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle Libraries">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/build/libs/asm-3.1r.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
