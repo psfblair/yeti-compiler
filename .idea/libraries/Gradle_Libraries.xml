@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle Libraries">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/build/libs/asm-3.1r.jar!/" />
+      <root url="jar://$USER_HOME_GRADLE$/cache/~mzz/asm/jars/asm-3.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
