@@ -1,3 +1,5 @@
+import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
+
 subprojects {
     apply plugin: 'java'
     group = 'yeti.lang'
@@ -39,10 +41,14 @@ project(':asm') {
 
     compileJava.dependsOn('downloadAsm')
 
-    task jar(overwrite: true, dependsOn: 'compileJava') << {
+    task compiledCodeJar(typeOf: Jar, overwrite: true) {
+        baseName = 'asm-renamer'
+    }
+
+    task renameAsmJar(dependsOn: 'compileJava') << {
         description = "Overwrites the standard jar task with one that renames the class files in the asm jar."
         inputs.file("$asmJarDir/$asmJarName")
-        outputs.file file("$buildDir/libs/$asmRenamedJarName")
+        outputs.file( file("$buildDir/libs/$asmRenamedJarName") )
 
         mkdir "$buildDir/libs"
         ant.java(classname: "yeti.lang.Rename", failonerror: true) {
@@ -50,6 +56,13 @@ project(':asm') {
             arg(value: "$asmJarDir/$asmJarName")
             arg(value: "$buildDir/libs/$asmRenamedJarName")
         }
+    }
+
+    // DefaultPublishArtifact(String name, String extension, String type,
+    //                        String classifier, Date date, File file, Object... tasks)
+    artifacts {
+        archives new DefaultPublishArtifact("asm-3.1r", "jar", "jar", "", new Date(),
+                file("$buildDir/libs/$asmRenamedJarName"), renameAsmJar)
     }
 }
 
