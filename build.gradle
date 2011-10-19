@@ -16,12 +16,13 @@ subprojects {
 yeti_project_root = "$project.projectDir"
 
 project(':asm') {
-    version =  '3.1r'
+    asmJarDependencyVersion =    '3.1'
+    asmModuleName              =    "asm"
+    version                 =    "${asmJarDependencyVersion}r"
 
     asmJarDir  =            "$project.gradle.gradleUserHomeDir/cache/~mzz/asm/jars"
-    asmJarName =            'asm-3.1.jar'
-    asmRenamedJarName =     'asm-3.1r.jar'
-    asmJarDependencyVersion =    '3.1'
+    asmJarName =            "${asmModuleName}-${asmJarDependencyVersion}.jar"
+    asmRenamedJar =         "$buildDir/libs/${asmModuleName}-${version}.jar"
 
     repositories {
         add(new org.apache.ivy.plugins.resolver.URLResolver()) {
@@ -41,28 +42,24 @@ project(':asm') {
 
     compileJava.dependsOn('downloadAsm')
 
-    task compiledCodeJar(typeOf: Jar, overwrite: true) {
+    jar {
         baseName = 'asm-renamer'
     }
 
     task renameAsmJar(dependsOn: 'compileJava') << {
         description = "Overwrites the standard jar task with one that renames the class files in the asm jar."
-        inputs.file("$asmJarDir/$asmJarName")
-        outputs.file( file("$buildDir/libs/$asmRenamedJarName") )
-
         mkdir "$buildDir/libs"
         ant.java(classname: "yeti.lang.Rename", failonerror: true) {
             classpath(path: "$project.buildDir/classes/main")
             arg(value: "$asmJarDir/$asmJarName")
-            arg(value: "$buildDir/libs/$asmRenamedJarName")
+            arg(value: asmRenamedJar)
         }
     }
 
     // DefaultPublishArtifact(String name, String extension, String type,
     //                        String classifier, Date date, File file, Object... tasks)
     artifacts {
-        archives new DefaultPublishArtifact("asm-3.1r", "jar", "jar", "", new Date(),
-                file("$buildDir/libs/$asmRenamedJarName"), renameAsmJar)
+        archives new DefaultPublishArtifact("asm-3.1r", "jar", "jar", "", new Date(), file(asmRenamedJar), renameAsmJar)
     }
 }
 
