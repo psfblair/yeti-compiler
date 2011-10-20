@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/src/Yeti-compiler.iml" filepath="$PROJECT_DIR$/src/Yeti-compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/asm/asm.iml" filepath="$PROJECT_DIR$/asm/asm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/compiler/compiler.iml" filepath="$PROJECT_DIR$/compiler/compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lang/lang.iml" filepath="$PROJECT_DIR$/lang/lang.iml" />
+      <module fileurl="file://$PROJECT_DIR$/special/special.iml" filepath="$PROJECT_DIR$/special/special.iml" />
     </modules>
   </component>
 </project>
