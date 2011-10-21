@@ -53,7 +53,7 @@ final class VariantConstructor extends Code implements CodeGen {
         };
         Tag tag = new Tag();
         tag.setType(res);
-        tag.polymorph = arg.polymorph;
+        tag.setPolymorph(arg.polymorph);
         if (arg.flagop(CONST)) {
             Object[] key = {"TAG", name, arg.valueKey()};
             tag.key = Arrays.asList(key);

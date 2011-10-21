@@ -1,21 +1,25 @@
 package yeti.lang.compiler.casecode;
 
+import yeti.lang.compiler.code.BindRef;
+import yeti.lang.compiler.code.Binder;
+import yeti.lang.compiler.code.Ctx;
+import yeti.lang.compiler.yeti.type.YType;
 import yeti.renamed.asm3.Label;
 
 final class BindPattern extends CasePattern implements Binder {
-    private yeti.lang.compiler.CaseExpr caseExpr;
+    private CaseExpr caseExpr;
     private int nth;
 
     BindRef param = new BindRef() {
-        void gen(Ctx ctx) {
+        public void gen(Ctx ctx) {
             ctx.load(caseExpr.paramStart + nth);
         }
     };
 
-    BindPattern(yeti.lang.compiler.CaseExpr caseExpr, YType type) {
+    BindPattern(CaseExpr caseExpr, YType type) {
         this.caseExpr = caseExpr;
-        param.binder = this;
-        param.type = type;
+        param.setBinder(this);
+        param.setType(type);
         nth = caseExpr.paramCount++;
     }
 

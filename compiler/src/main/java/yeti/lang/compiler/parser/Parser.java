@@ -31,13 +31,12 @@
 
 package yeti.lang.compiler.parser;
 
+import yeti.lang.Core;
+import yeti.lang.compiler.YetiC;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import yeti.lang.Core;
-import yeti.lang.compiler.YetiC;
-import yeti.lang.compiler.parser.ParseException;
 
 public final class Parser {
     private static final char[] CHS =

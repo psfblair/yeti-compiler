@@ -1,7 +1,7 @@
 package yeti.lang.compiler;
 
-import org.junit.*;
 import mockit.*;
+import org.junit.*;
 
 import java.io.FileInputStream;
 

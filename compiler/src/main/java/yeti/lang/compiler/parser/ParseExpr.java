@@ -31,8 +31,6 @@
 
 package yeti.lang.compiler.parser;
 
-import yeti.lang.compiler.parser.ParseException;
-
 final class ParseExpr {
     private boolean lastOp = true;
     private BinOp root = new BinOp(null, -1, false);
@@ -40,8 +38,8 @@ final class ParseExpr {
 
     private void apply(Node node) {
         BinOp apply = new BinOp("", 2, true);
-        apply.line = node.line;
-        apply.col = node.col;
+        apply.setLine(node.getLine());
+        apply.setCol(node.getCol());
         addOp(apply);
     }
 

@@ -1,9 +1,6 @@
 package yeti.lang.compiler.typeprettyprinter;
 
-import yeti.lang.AIter;
-import yeti.lang.AList;
-import yeti.lang.Core;
-import yeti.lang.Fun;
+import yeti.lang.*;
 
 class ShowTypeFun extends Fun2 {
     Fun showType;

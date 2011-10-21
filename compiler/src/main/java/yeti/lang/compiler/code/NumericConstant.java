@@ -6,7 +6,7 @@ import yeti.lang.Num;
 import yeti.lang.RatNum;
 import yeti.lang.compiler.yeti.type.YetiType;
 
-final class NumericConstant extends Code implements CodeGen {
+public final class NumericConstant extends Code implements CodeGen {
     Num num;
 
     NumericConstant(Num num) {

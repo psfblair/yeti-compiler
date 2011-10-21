@@ -1,5 +1,7 @@
 package yeti.lang.compiler.java;
 
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.*;
 
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
     List methods = new ArrayList();
     List staticMethods = new ArrayList();
     List constructors = new ArrayList();
-    yeti.lang.compiler.JavaType parent;
+    JavaType parent;
 
     private String className;
     private String[] interfaces;
@@ -31,7 +33,7 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
     public void visit(int version, int access, String name, String signature,
                       String superName, String[] interfaces) {
         if (superName != null)
-            parent = yeti.lang.compiler.JavaType.fromDescription('L' + superName + ';');
+            parent = JavaType.fromDescription('L' + superName + ';');
         this.access = access;
         this.interfaces = interfaces;
 /*        System.err.println("visit: ver=" + version + " | access=" + access
@@ -122,8 +124,8 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
                     + desc + " | sig=" + signature + " | val=" + value
                     + " | access=" + access);*/
             List l = parseSig(0, signature == null ? desc : signature);
-            yeti.lang.compiler.JavaType.Field f =
-                new yeti.lang.compiler.JavaType.Field(name, access, className, (YType) l.get(0));
+            JavaType.Field f =
+                new JavaType.Field(name, access, className, (YType) l.get(0));
             if ((access & (ACC_FINAL | ACC_STATIC)) == (ACC_FINAL | ACC_STATIC))
                 f.constValue = value;
             (((access & ACC_STATIC) == 0) ? fields : staticFields).put(name, f);
@@ -145,7 +147,7 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
                 (exceptions == null ? "()"
                     : Arrays.asList(exceptions).toString())
                 + " | access=" + access);*/
-            yeti.lang.compiler.JavaType.Method m = new yeti.lang.compiler.JavaType.Method();
+            JavaType.Method m = new JavaType.Method();
 //            if (signature == null) {
                 signature = desc;
   //          }

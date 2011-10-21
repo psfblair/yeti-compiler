@@ -10,4 +10,4 @@ public interface YetiC {
     public static final int CF_EVAL_BIND        = 40;
 
     static final String[] PRELOAD = { "yeti/lang/std", "yeti/lang/io" };
- }
+}

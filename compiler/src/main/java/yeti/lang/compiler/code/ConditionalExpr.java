@@ -9,7 +9,7 @@ final class ConditionalExpr extends Code {
     ConditionalExpr(YType type, Code[][] choices, boolean poly) {
         this.setType(type);
         this.choices = choices;
-        this.polymorph = poly;
+        this.setPolymorph(poly);
     }
 
     public void gen(Ctx ctx) {

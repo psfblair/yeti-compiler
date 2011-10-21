@@ -22,7 +22,7 @@ final class EvalBind implements Binder, CaptureWrapper, Opcodes, CodeGen {
             {
                 setType(bind.getType());
                 setBinder(EvalBind.this);
-                polymorph = !bind.isMutable() && bind.isPolymorph();
+                setPolymorph(!bind.isMutable() && bind.isPolymorph());
             }
 
             public void gen(Ctx ctx) {
@@ -39,7 +39,7 @@ final class EvalBind implements Binder, CaptureWrapper, Opcodes, CodeGen {
                 return (fl & ASSIGN) != 0 && bind.isMutable();
             }
 
-            CaptureWrapper capture() {
+            protected CaptureWrapper capture() {
                 return EvalBind.this;
             }
         };

@@ -30,16 +30,15 @@
  */
 package yeti.lang.compiler.java;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import yeti.lang.compiler.CompileException;
-import yeti.lang.compiler.closure.RootClosure;
+import yeti.lang.compiler.closure.*;
+import yeti.lang.compiler.code.*;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
 
-final class JavaClass extends CapturingClosure implements Runnable {
+import java.util.*;
+
+public final class JavaClass extends CapturingClosure implements Runnable {
     private String className;
     private String[] implement;
     private YetiType.ClassBinding parentClass;
@@ -63,9 +62,9 @@ final class JavaClass extends CapturingClosure implements Runnable {
 
         Arg(YType type, boolean isSuper) {
             this.javaType = type;
-            this.type = JavaType.convertValueType(type);
+            this.setType(JavaType.convertValueType(type));
             this.isSuper = isSuper;
-            binder = this;
+            setBinder(this);
         }
 
         public BindRef getRef(int line) {
@@ -77,24 +76,28 @@ final class JavaClass extends CapturingClosure implements Runnable {
 
         void gen(Ctx ctx) {
             ctx.load(argn);
-            if (javaType.type == YetiType.JAVA_ARRAY) {
+            if (javaType.getType() == YetiType.JAVA_ARRAY) {
                 ctx.forceType(JavaType.descriptionOf(javaType));
-            } else if (javaType.javaType.description.charAt(0) == 'L') {
-                ctx.forceType(javaType.javaType.className());
+            } else if (javaType.getJavaType().getDescription().charAt(0) == 'L') {
+                ctx.forceType(javaType.getJavaType().className());
             }
         }
 
-        boolean flagop(int flag) {
+        protected boolean flagop(int flag) {
             return (flag & DIRECT_THIS) != 0 && argn == 0;
         }
     }
 
-    static class Meth extends JavaType.Method implements Closure {
+    public static class Meth extends JavaType.Method implements Closure {
         private List args = new ArrayList();
-        private AClosure closure = new RootClosure(); // just for closure init
+        private AClosure closure; // just for closure init
         private int line;
         Capture captures;
         Code code;
+
+        public Meth() {
+            closure = new RootClosure();
+        }
 
         Binder addArg(YType type) {
             Arg arg = new Arg(type, false);
@@ -137,7 +140,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
             for (int i = 0; i < arguments.length; ++i) {
                 if (arguments[i].type != YetiType.JAVA)
                     continue;
-                String descr = arguments[i].javaType.description;
+                String descr = arguments[i].getJavaType().getDescription();
                 if (descr != "Ljava/lang/String;" && descr.charAt(0) == 'L')
                     continue;
                 loadArg(ctx, arguments[i], i + n);
@@ -155,7 +158,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
             convertArgs(ctx);
             closure.genClosureInit(ctx);
             JavaExpr.convertedArg(ctx, code, returnType, line);
-            if (returnType.type == YetiType.UNIT) {
+            if (returnType.getType() == YetiType.UNIT) {
                 ctx.insn(POP);
                 ctx.insn(RETURN);
             } else {
@@ -203,7 +206,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
         }
 
         public String captureType() {
-            return classType.javaType.description;
+            return classType.getJavaType().getDescription();
         }
 
         public void gen2(Ctx ctx, Code value, int _) {
@@ -216,7 +219,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
             if (javaType == null) {
                 if (name == "_")
                     throw new IllegalStateException("NO _ REF");
-                javaType = Code.javaType(value.type);
+                javaType = Code.javaType(value.getType());
                 descr = 'L' + javaType + ';';
             }
             BindRef ref = new BindRef() {
@@ -243,8 +246,8 @@ final class JavaClass extends CapturingClosure implements Runnable {
                     return Field.this;
                 }
             };
-            ref.type = value.type;
-            ref.binder = this;
+            ref.setType(value.getType());
+            ref.setBinder(this);
             return ref;
         }
 
@@ -253,7 +256,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
                 // hack to allow defining serialVersionUID
                 Long v = new Long((((NumericConstant) value).num).longValue());
                 ctx.cw.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL,
-                                  name, "J", null, v);
+                        name, "J", null, v);
                 directConst = true;
             } else if (javaType == null) {
                 // _ = or just unused binding
@@ -271,7 +274,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
     }
 
     JavaClass(String className, boolean isPublic) {
-        type = YetiType.UNIT_TYPE;
+        setType(YetiType.UNIT_TYPE);
         this.className = className;
         classType = new YType(YetiType.JAVA, YetiType.NO_PARAM);
         classType.javaType = JavaType.createNewClass(className, this);
@@ -285,8 +288,8 @@ final class JavaClass extends CapturingClosure implements Runnable {
 
     static void loadArg(Ctx ctx, YType argType, int n) {
         int ins = ALOAD;
-        if (argType.type == YetiType.JAVA) {
-            switch (argType.javaType.description.charAt(0)) {
+        if (argType.getType() == YetiType.JAVA) {
+            switch (argType.getJavaType().getDescription().charAt(0)) {
                 case 'D': ins = DLOAD; break;
                 case 'F': ins = FLOAD; break;
                 case 'J': ins = LLOAD; break;
@@ -300,7 +303,7 @@ final class JavaClass extends CapturingClosure implements Runnable {
     static void genRet(Ctx ctx, YType returnType) {
         int ins = ARETURN;
         if (returnType.type == YetiType.JAVA) {
-            switch (returnType.javaType.description.charAt(0)) {
+            switch (returnType.getJavaType().getDescription().charAt(0)) {
                 case 'D': ins = DRETURN; break;
                 case 'F': ins = FRETURN; break;
                 case 'J': ins = LRETURN; break;

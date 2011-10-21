@@ -2,8 +2,6 @@ package yeti.lang.compiler.parser;
 
 import java.util.List;
 
-import yeti.lang.compiler.parser.ParseException;;
-
 final class Bind extends Node {
     String name;
     Node expr;
@@ -53,8 +51,8 @@ final class Bind extends Node {
                     "Illegal binding name: " + nameNode
                      + " (missing ; after expression?)");
         }
-        line = nameNode.line;
-        col = nameNode.col;
+        setLine(nameNode.getLine());
+        setCol(nameNode.getCol());
         this.name = ((Sym) nameNode).sym;
         if (first < args.size() && args.get(first) instanceof BinOp &&
                 ((BinOp) args.get(first)).op == Parser.FIELD_OP) {

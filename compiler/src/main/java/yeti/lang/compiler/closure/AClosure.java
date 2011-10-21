@@ -31,14 +31,14 @@
 
 package yeti.lang.compiler.closure;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import yeti.lang.compiler.code.BindExpr;
 import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.Ctx;
 
-abstract class AClosure extends Code implements Closure {
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class AClosure extends Code implements Closure {
     private List closureVars = new ArrayList();
 
     public void addVar(BindExpr binder) {

@@ -1,5 +1,7 @@
 package yeti.lang.compiler.casecode;
 
+import yeti.lang.compiler.code.Code;
+import yeti.lang.compiler.code.Ctx;
 import yeti.renamed.asm3.Label;
 
 final class ConstPattern extends CasePattern {

@@ -31,15 +31,29 @@
 
 package yeti.lang.compiler.parser;
 
-import yeti.lang.compiler.parser.ParseException;
-
 public class Node {
-    int line;
-    int col;
+    private int line;
+    private int col;
     String kind;
 
     String str() {
         return toString();
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
     }
 
     Node pos(int line, int col) {

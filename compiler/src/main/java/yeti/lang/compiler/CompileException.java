@@ -30,8 +30,10 @@
  */
 package yeti.lang.compiler;
 
-import yeti.lang.Core;
+import yeti.lang.compiler.java.JavaClassNotFoundException;
 import yeti.lang.compiler.parser.Node;
+import yeti.lang.compiler.yeti.type.Scope;
+import yeti.lang.compiler.yeti.type.TypeException;
 import yeti.lang.compiler.yeti.type.YType;
 
 public class CompileException extends RuntimeException {
@@ -65,7 +67,7 @@ public class CompileException extends RuntimeException {
             }
         }
         result.append(s.substring(p));
-        if (!msg && ex != null && ex.special) {
+        if (!msg && ex != null && ex.isSpecial()) {
             result.append(" (");
             result.append(ex.getMessage(scope));
             result.append(")");
@@ -87,8 +89,7 @@ public class CompileException extends RuntimeException {
         this.what = what;
     }
 
-    public CompileException(Node pos,
-                            JavaClassNotFoundException ex) {
+    public CompileException(Node pos, JavaClassNotFoundException ex) {
         this(ex, pos, "Unknown class: " + ex.getMessage());
     }
 
@@ -99,8 +100,8 @@ public class CompileException extends RuntimeException {
     private CompileException(Throwable ex, Node pos, String what) {
         super(ex);
         if (pos != null) {
-            line = pos.line;
-            col = pos.col;
+            line = pos.getLine();
+            col = pos.getCol();
         }
         this.what = what;
     }

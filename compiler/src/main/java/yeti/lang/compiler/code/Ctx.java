@@ -1,26 +1,26 @@
 package yeti.lang.compiler.code;
 
-import java.util.HashMap;
-import java.util.Map;
 import yeti.renamed.asm3.ClassWriter;
 import yeti.renamed.asm3.Label;
 import yeti.renamed.asm3.MethodVisitor;
 import yeti.renamed.asm3.Opcodes;
 
-public final class Ctx implements Opcodes {
-    CompileCtx compilation;
+import java.util.HashMap;
+import java.util.Map;
 
+public final class Ctx implements Opcodes {
+    private CompileCtx compilation;
     private String className;
-    ClassWriter cw;
+    private ClassWriter cw;
     private MethodVisitor m;
     private int lastInsn = -1;
     private String lastType;
-    Constants constants;
+    private Constants constants;
     private Map usedMethodNames;
     private int localVarCount;
     private int fieldCounter;
     int lastLine;
-    int tainted; // you are inside loop, natural laws a broken
+    private int tainted; // you are inside loop, natural laws a broken
 
     public int getLocalVarCount() {
         return localVarCount;
@@ -44,8 +44,24 @@ public final class Ctx implements Opcodes {
         return className;
     }
 
+    public ClassWriter getClassWriter() {
+        return cw;
+    }
+
+    public CompileCtx getCompilation() {
+        return compilation;
+    }
+
+    public Constants getConstants() {
+        return constants;
+    }
+
     public Map getUsedMethodNames() {
         return usedMethodNames;
+    }
+
+    public int getTainted() {
+        return tainted;
     }
 
     public void captureCast(String type) {
@@ -170,7 +186,7 @@ public final class Ctx implements Opcodes {
         this.className = className;
     }
 
-    Ctx newClass(int flags, String name, String extend, String[] interfaces) {
+    public Ctx newClass(int flags, String name, String extend, String[] interfaces) {
         Ctx ctx = new Ctx(compilation, constants,
                           new YClassWriter(compilation.classWriterFlags), name);
         ctx.usedMethodNames = new HashMap();
@@ -181,7 +197,7 @@ public final class Ctx implements Opcodes {
         return ctx;
     }
 
-    Ctx newMethod(int flags, String name, String type) {
+    public Ctx newMethod(int flags, String name, String type) {
         Ctx ctx = new Ctx(compilation, constants, cw, className);
         ctx.usedMethodNames = usedMethodNames;
         ctx.m = cw.visitMethod(flags, name, type, null, null);
@@ -195,7 +211,7 @@ public final class Ctx implements Opcodes {
         cw.visitInnerClass(className, outer.className, fn, access);
     }
 
-    void closeMethod() {
+    public void closeMethod() {
         insn(-1);
         m.visitMaxs(0, 0);
         m.visitEnd();
@@ -233,7 +249,7 @@ public final class Ctx implements Opcodes {
         m.visitLabel(end);
     }
 
-    void visitIntInsn(int opcode, int param) {
+    public void visitIntInsn(int opcode, int param) {
         insn(-1);
         if (opcode != IINC)
             m.visitIntInsn(opcode, param);
@@ -241,13 +257,13 @@ public final class Ctx implements Opcodes {
             m.visitIincInsn(param, -1);
     }
 
-    void visitInit(String type, String descr) {
+    public void visitInit(String type, String descr) {
         insn(-2);
         m.visitMethodInsn(INVOKESPECIAL, type, "<init>", descr);
         lastType = type;
     }
 
-    void ldcInsn(Object cst) {
+    public void ldcInsn(Object cst) {
         insn(-1);
         m.visitLdcInsn(cst);
         if (cst instanceof String) {
@@ -261,8 +277,8 @@ public final class Ctx implements Opcodes {
         m.visitTryCatchBlock(start, end, handler, type);
     }
 
-    void switchInsn(int min, int max, Label dflt,
-                         int[] keys, Label[] labels) {
+    public void switchInsn(int min, int max, Label dflt,
+                           int[] keys, Label[] labels) {
         insn(-1);
         if (keys == null) {
             m.visitTableSwitchInsn(min, max, dflt, labels);

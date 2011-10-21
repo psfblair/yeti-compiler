@@ -37,7 +37,11 @@ import yeti.lang.compiler.classfinder.ClassFinder;
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.Opcodes;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /*
  * Represents Java source file.

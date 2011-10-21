@@ -32,10 +32,10 @@
 package yeti.lang.compiler.closure;
 
 import yeti.lang.compiler.code.BindExpr;
+import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.Ctx;
 import yeti.lang.compiler.code.LoadVar;
 import yeti.lang.compiler.yeti.type.YType;
-import yeti.lang.compiler.code.Code;
 
 public class Apply extends Code {
     private BindExpr.Ref ref;

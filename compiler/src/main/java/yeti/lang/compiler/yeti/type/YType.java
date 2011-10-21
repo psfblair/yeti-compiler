@@ -1,7 +1,8 @@
 package yeti.lang.compiler.yeti.type;
 
-import java.util.Map;
 import yeti.lang.compiler.java.JavaType;
+
+import java.util.Map;
 
 public class YType {
     private int type;
@@ -56,12 +57,12 @@ public class YType {
         this.depth = depth;
     }
 
-    YType(int type, YType[] param) {
+    public YType(int type, YType[] param) {
         this.type = type;
         this.param = param;
     }
 
-    YType(String javaSig) {
+    public YType(String javaSig) {
         type = yeti.lang.compiler.yeti.type.YetiType.JAVA;
         this.javaType = JavaType.fromDescription(javaSig);
         param = yeti.lang.compiler.yeti.type.YetiType.NO_PARAM;

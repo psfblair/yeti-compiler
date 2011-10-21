@@ -30,14 +30,15 @@
  */
 package yeti.lang.compiler.yeti;
 
-import java.util.*;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Parameter;
 import yeti.lang.Fun;
 import yeti.lang.compiler.CompileException;
 import yeti.lang.compiler.YetiC;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class YetiTask extends MatchingTask {
     private List paths = new ArrayList();

@@ -30,15 +30,9 @@
 
 package yeti.lang.compiler.yeti;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import yeti.lang.Num;
 import yeti.lang.FloatNum;
 import yeti.lang.IntNum;
+import yeti.lang.Num;
 import yeti.lang.compiler.CompileException;
 import yeti.lang.compiler.YetiC;
 import yeti.lang.compiler.closure.Function;
@@ -46,6 +40,8 @@ import yeti.lang.compiler.closure.RootClosure;
 import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.CompileCtx;
 import yeti.lang.compiler.yeti.type.YetiType;
+
+import java.util.*;
 
 public final class YetiAnalyzer extends YetiType {
     static final class TopLevel {

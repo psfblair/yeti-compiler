@@ -32,7 +32,8 @@ package yeti.lang.compiler.yeti;
 
 import yeti.lang.compiler.yeti.type.YType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class YetiEval {
     private static ThreadLocal instance = new ThreadLocal();

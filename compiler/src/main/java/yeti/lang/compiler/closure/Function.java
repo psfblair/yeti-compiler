@@ -31,10 +31,7 @@
 
 package yeti.lang.compiler.closure;
 
-import yeti.lang.compiler.code.BindRef;
-import yeti.lang.compiler.code.Binder;
-import yeti.lang.compiler.code.Code;
-import yeti.lang.compiler.code.Ctx;
+import yeti.lang.compiler.code.*;
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.renamed.asm3.Label;
 
@@ -48,7 +45,7 @@ public final class Function extends CapturingClosure implements Binder {
         }
     };
 
-    String name; // name of the generated function class
+    private String name; // name of the generated function class
     Binder selfBind;
     Code body;
     String bindName; // function (self)binding name, if there is any
@@ -91,7 +88,7 @@ public final class Function extends CapturingClosure implements Binder {
             } else {
                 ctx.load(argVar);
                 // inexact nulling...
-                if (--argUsed == 0 && ctx.tainted == 0) {
+                if (--argUsed == 0 && ctx.getTainted() == 0) {
                     ctx.insn(ACONST_NULL);
                     ctx.varInsn(ASTORE, argVar);
                 }
@@ -111,6 +108,10 @@ public final class Function extends CapturingClosure implements Binder {
     public BindRef getRef(int line) {
         ++argUsed;
         return arg;
+    }
+
+    public String getName() {
+        return name;
     }
 
     // uncaptures captured variables if possible
@@ -149,15 +150,15 @@ public final class Function extends CapturingClosure implements Binder {
             }
             return code;
         }
-        if (selfBind == code.binder && !code.flagop(ASSIGN)) {
+        if (selfBind == code.getBinder() && !code.flagop(ASSIGN)) {
             if (selfRef == null) {
                 selfRef = new CaptureRef() {
-                    void gen(Ctx ctx) {
+                    public void gen(Ctx ctx) {
                         ctx.load(0);
                     }
                 };
-                selfRef.binder = selfBind;
-                selfRef.type = code.type;
+                selfRef.setBinder(selfBind);
+                selfRef.setType(code.getType());
                 selfRef.ref = code;
 
                 // Right place for this should be outside of if (so it would
@@ -165,7 +166,7 @@ public final class Function extends CapturingClosure implements Binder {
                 // in such case slows some code down (b/c array capture).
                 // Having it here means non-first self-refs arity stays zero
                 // and so these will be considered to be used as fun-values.
-                selfRef.origin = code.origin;
+                selfRef.setOrigin(code.getOrigin());
 
                 selfRef.capturer = this;
             }
@@ -253,14 +254,14 @@ public final class Function extends CapturingClosure implements Binder {
             methodImpl.argVar = ++argCounter;
 
             for (Capture c = captures; c != null; c = c.next)
-                captureMapping.put(c.binder, c);
+                captureMapping.put(c.getBinder(), c);
             Capture tmp = new Capture();
             tmp.localVar = 0;
             captureMapping.put(selfBind, tmp);
         }
 
         // Create method
-        Map usedNames = ctx.usedMethodNames;
+        Map usedNames = ctx.getUsedMethodNames();
         bindName = bindName != null ? mangle(bindName) : "_";
         if (usedNames.containsKey(bindName) || bindName.startsWith("_"))
             bindName += usedNames.size();
@@ -280,7 +281,7 @@ public final class Function extends CapturingClosure implements Binder {
         // Hijack the inner functions capture mapping...
         if (captureMapping != null)
             for (Capture c = methodImpl.captures; c != null; c = c.next) {
-                Object mapped = captureMapping.get(c.binder);
+                Object mapped = captureMapping.get(c.getBinder());
                 if (mapped != null) {
                     c.localVar = ((Capture) mapped).localVar;
                     c.ignoreGet = c.localVar > 0;
@@ -296,7 +297,7 @@ public final class Function extends CapturingClosure implements Binder {
             }
 
         // Generate method body
-        name = ctx.className;
+        name = ctx.getClassName();
         m.localVarCount = methodImpl.argVar + 1; // capturearray, args
         methodImpl.genClosureInit(m);
         m.visitLabel(methodImpl.restart = new Label());
@@ -316,7 +317,7 @@ public final class Function extends CapturingClosure implements Binder {
      * An instance is also given, but capture fields are not initialised
      * (the captures are set later in the finishGen).
      */
-    void prepareGen(Ctx ctx) {
+    public void prepareGen(Ctx ctx) {
         if (methodImpl != null) {
             prepareMethod(ctx);
             return;
@@ -333,7 +334,7 @@ public final class Function extends CapturingClosure implements Binder {
         if (bindName == null)
             bindName = "";
         name = ctx.compilation.createClassName(ctx,
-                        ctx.className, mangle(bindName));
+                        ctx.getClassName(), mangle(bindName));
 
         publish &= shared;
         String funClass =
@@ -361,14 +362,15 @@ public final class Function extends CapturingClosure implements Binder {
                 Capture c = argCaptures[i];
                 if (c != null && !c.uncaptured) {
                     c.gen(apply);
-                    c.localVar = apply.localVarCount;
+                    c.localVar = apply.getLocalVarCount();
                     c.ignoreGet = true;
-                    apply.varInsn(ASTORE, apply.localVarCount++);
+                    apply.varInsn(ASTORE, apply.getLocalVarCount());
+                    apply.incrementLocalVarCountBy(1);
                 }
             }
         }
         if (moduleInit && publish) {
-            apply.methodInsn(INVOKESTATIC, ctx.className,
+            apply.methodInsn(INVOKESTATIC, ctx.getClassName(),
                              "eval", "()Ljava/lang/Object;");
             apply.insn(POP);
         }
@@ -393,7 +395,7 @@ public final class Function extends CapturingClosure implements Binder {
         }
     }
 
-    void finishGen(Ctx ctx) {
+    public void finishGen(Ctx ctx) {
         if (merged) {
             ((Function) body).finishGen(ctx);
             return;

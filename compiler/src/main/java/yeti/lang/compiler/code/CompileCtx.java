@@ -97,14 +97,14 @@ public final class CompileCtx implements Opcodes {
             String jname = Code.mangle(name);
             String type = Code.javaType((YType) entry.getValue());
             String descr = 'L' + type + ';';
-            ctx.cw.visitField(ACC_PUBLIC | ACC_STATIC, jname,
+            ctx.getClassWriter().visitField(ACC_PUBLIC | ACC_STATIC, jname,
                     descr, null, null).visitEnd();
             ctx.insn(DUP);
             ctx.ldcInsn(name);
             ctx.methodInsn(INVOKEINTERFACE, "yeti/lang/Struct",
                 "get", "(Ljava/lang/String;)Ljava/lang/Object;");
             ctx.typeInsn(CHECKCAST, type);
-            ctx.fieldInsn(PUTSTATIC, ctx.className, jname, descr);
+            ctx.fieldInsn(PUTSTATIC, ctx.getClassName(), jname, descr);
         }
     }
 
@@ -247,9 +247,9 @@ public final class CompileCtx implements Opcodes {
                    (flags & YetiC.CF_EVAL) != 0 ? "yeti/lang/Fun" : null, null);
             constants.ctx = ctx;
             if (module) {
-                ctx.cw.visitField(ACC_PRIVATE | ACC_STATIC, "$",
+                ctx.getClassWriter().visitField(ACC_PRIVATE | ACC_STATIC, "$",
                                   "Ljava/lang/Object;", null, null).visitEnd();
-                ctx.cw.visitField(ACC_PRIVATE | ACC_STATIC,
+                ctx.getClassWriter().visitField(ACC_PRIVATE | ACC_STATIC,
                                   "_$", "Z", null, Boolean.FALSE);
                 ctx = ctx.newMethod(ACC_PUBLIC | ACC_STATIC | ACC_SYNCHRONIZED,
                                     "eval", "()Ljava/lang/Object;");
@@ -271,7 +271,7 @@ public final class CompileCtx implements Opcodes {
                 } else {
                     codeTree.gen(ctx);
                 }
-                ctx.cw.visitAttribute(new YetiTypeAttr(codeTree.getModuleType()));
+                ctx.getClassWriter().visitAttribute(new YetiTypeAttr(codeTree.getModuleType()));
                 if (codeTree.getType().getType() == YetiType.STRUCT) {
                     generateModuleFields(codeTree.getType().getFinalMembers(), ctx,
                                          codeTree.getModuleType().getDirectFields());
@@ -345,9 +345,9 @@ public final class CompileCtx implements Opcodes {
         cnt = unstoredClasses.size();
         for (i = 0; i < cnt; ++i) {
             Ctx c = (Ctx) unstoredClasses.get(i);
-            definedClasses.put(c.className, "");
-            String name = c.className + ".class";
-            byte[] content = c.cw.toByteArray();
+            definedClasses.put(c.getClassName(), "");
+            String name = c.getClassName() + ".class";
+            byte[] content = c.getClassWriter().toByteArray();
             writer.writeClass(name, content);
             classPath.define(name, content);
         }

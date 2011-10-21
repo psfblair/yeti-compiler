@@ -33,9 +33,9 @@ package yeti.lang.compiler.closure;
 
 import yeti.lang.compiler.code.*;
 
-final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
-    String id;
-    Capture next;
+public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
+    private String id;
+    private Capture next;
     CaptureWrapper wrapper;
     Object identity;
     int localVar = -1; // -1 - use this (TryCatch captures use 0 localVar)
@@ -52,7 +52,11 @@ final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
         genGet(ctx);
     }
 
-    String getId(Ctx ctx) {
+    public String getId() {
+        return id;
+    }
+
+    public String getId(Ctx ctx) {
         if (id == null) {
             id = "_".concat(Integer.toString(ctx.getFieldCounter()));
             ctx.incrementFieldCounterBy(1);
@@ -60,7 +64,11 @@ final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
         return id;
     }
 
-    protected boolean flagop(int fl) {
+    public Capture getNext() {
+        return next;
+    }
+
+    public boolean flagop(int fl) {
         /*
          * DIRECT_BIND is allowed, because with code like
          * x = 1; try x finally yrt
@@ -152,7 +160,7 @@ final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
         return refType;
     }
 
-    void captureGen(Ctx ctx) {
+    public void captureGen(Ctx ctx) {
         if (wrapper == null) {
             ref.gen(ctx);
         } else {

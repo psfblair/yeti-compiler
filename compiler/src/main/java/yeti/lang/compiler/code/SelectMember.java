@@ -10,7 +10,7 @@ abstract class SelectMember extends BindRef implements CodeGen {
 
     SelectMember(YType type, Code st, String name, int line, boolean polymorph) {
         setType(type);
-        this.polymorph = polymorph;
+        setPolymorph(polymorph);
         this.st = st;
         this.name = name;
         this.line = line;

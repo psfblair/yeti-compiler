@@ -8,7 +8,7 @@ final class SelectMemberFun extends Code implements CodeGen {
     SelectMemberFun(YType type, String[] names) {
         setType(type);
         this.names = names;
-        this.polymorph = true;
+        setPolymorph(true);
     }
 
     public void gen2(Ctx ctx, Code param, int line) {

@@ -30,18 +30,8 @@
  */
 package yeti.lang.compiler.classfinder;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-import yeti.renamed.asm3.ClassReader;
 
 abstract class ClassPathItem {
     abstract InputStream getStream(String name) throws IOException;

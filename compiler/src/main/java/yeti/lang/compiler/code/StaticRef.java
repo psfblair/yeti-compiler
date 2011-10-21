@@ -2,17 +2,17 @@ package yeti.lang.compiler.code;
 
 import yeti.lang.compiler.yeti.type.YType;
 
-class StaticRef extends BindRef {
+public class StaticRef extends BindRef {
     String className;
     protected String funFieldName;
     int line;
    
-    StaticRef(String className, String fieldName, YType type, Binder binder, boolean polymorph, int line) {
+    protected StaticRef(String className, String fieldName, YType type, Binder binder, boolean polymorph, int line) {
         setType(type);
         setBinder(binder);
         this.className = className;
         this.funFieldName = fieldName;
-        this.polymorph = polymorph;
+        this.setPolymorph(polymorph);
         this.line = line;
     }
     

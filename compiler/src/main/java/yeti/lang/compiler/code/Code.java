@@ -1,15 +1,14 @@
 package yeti.lang.compiler.code;
 
 import yeti.lang.compiler.closure.Apply;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.Label;
 import yeti.renamed.asm3.Opcodes;
 
-import yeti.lang.compiler.yeti.type.YType;
-import yeti.lang.compiler.yeti.type.YetiType;
-
 public abstract class Code implements Opcodes {
     // constants used by flagop
-    static final int CONST      = 1;
+    public static final int CONST      = 1;
     public static final int PURE       = 2;
     
     // for bindrefs, mark as used lvalue
@@ -29,7 +28,7 @@ public abstract class Code implements Opcodes {
     static final int DIRECT_THIS = 0x40;
 
     // capture that requires bounding function to initialize its module
-    static final int MODULE_REQUIRED = 0x80;
+    protected static final int MODULE_REQUIRED = 0x80;
 
     // code object is a list range
     static final int LIST_RANGE = 0x100;
@@ -50,7 +49,7 @@ public abstract class Code implements Opcodes {
     protected void markTail() {
     }
 
-    protected boolean flagop(int flag) {
+    public boolean flagop(int flag) {
         return false;
     }
 
@@ -62,11 +61,11 @@ public abstract class Code implements Opcodes {
         this.type = type;
     }
 
-    protected boolean isPolymorph() {
+    public boolean isPolymorph() {
         return polymorph;
     }
 
-    protected void setPolymorph(boolean polymorph) {
+    public void setPolymorph(boolean polymorph) {
         this.polymorph = polymorph;
     }
 
@@ -117,7 +116,7 @@ public abstract class Code implements Opcodes {
 
     // Called by bind for direct bindings
     // bindings can use this for "preparation"
-    boolean prepareConst(Ctx ctx) {
+    public boolean prepareConst(Ctx ctx) {
         return flagop(CONST);
     }
 
@@ -146,7 +145,7 @@ public abstract class Code implements Opcodes {
     static final char[] mangle =
         "jQh$oBz  apCmds          cSlegqt".toCharArray();
 
-    static final String mangle(String s) {
+    protected static final String mangle(String s) {
         char[] a = s.toCharArray();
         char[] to = new char[a.length * 2];
         int l = 0;

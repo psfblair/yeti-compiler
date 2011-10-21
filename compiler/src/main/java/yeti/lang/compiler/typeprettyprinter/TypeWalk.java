@@ -31,8 +31,10 @@
 
 package yeti.lang.compiler.typeprettyprinter;
 
-import java.util.*;
-import yeti.lang.*;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
+import java.util.Arrays;
+import java.util.Map;
 
 class TypeWalk implements Comparable {
     int id;
@@ -64,7 +66,7 @@ class TypeWalk implements Comparable {
                 id = Integer.MAX_VALUE; // typedef parameter - match anything
                 if (p != null && p.var >= 0)
                     p.var = -p.var; // parameters must be saved
-            } else if (parent != null && parent.type.type == YetiType.MAP &&
+            } else if (parent != null && parent.type.getType() == YetiType.MAP &&
                        parent.st > 1 && (parent.st > 2 ||
                             parent.type.param[2] == YetiType.LIST_TYPE)) {
                 id = Integer.MAX_VALUE; // map kind - match anything

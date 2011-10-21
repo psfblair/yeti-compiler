@@ -3,10 +3,10 @@ package yeti.lang.compiler.code;
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
 
-final class UnitConstant extends BindRef {
+public final class UnitConstant extends BindRef {
     private final Object NULL = new Object();
 
-    UnitConstant(YType type) {
+    public UnitConstant(YType type) {
         setType(type == null ? YetiType.UNIT_TYPE : type);
     }
 

@@ -30,27 +30,14 @@
  */
 package yeti.lang.compiler.yeti.typeattr;
 
-import ClassFinder;
-import CompileCtx;
-import CompileException;
-import JavaType;
-import Scope;
-import TypeDescr;
-import TypePattern;
-import YType;
-import YetiParser;
-import YetiType;
-
-import java.util.*;
-
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
-import yeti.renamed.asm3.*;
-import yeti.lang.Tag;
-import java.io.IOException;
-import java.io.InputStream;
+import yeti.renamed.asm3.Attribute;
+import yeti.renamed.asm3.ByteVector;
+import yeti.renamed.asm3.ClassReader;
+import yeti.renamed.asm3.ClassWriter;
 
-import YetiParser.Node;
+import java.util.*;
 
 /*
  * Encoding:

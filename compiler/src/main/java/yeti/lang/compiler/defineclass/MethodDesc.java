@@ -30,11 +30,16 @@
 
 package yeti.lang.compiler.defineclass;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import yeti.lang.compiler.CompileException;
+import yeti.lang.compiler.code.Binder;
+import yeti.lang.compiler.java.JavaClass;
+import yeti.lang.compiler.parser.Node;
+import yeti.lang.compiler.yeti.type.Scope;
+import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.Opcodes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 final class MethodDesc extends YetiType {
     Binder[] arguments;

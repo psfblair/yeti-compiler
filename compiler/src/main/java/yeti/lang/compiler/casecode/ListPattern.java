@@ -1,5 +1,6 @@
 package yeti.lang.compiler.casecode;
 
+import yeti.lang.compiler.code.Ctx;
 import yeti.renamed.asm3.Label;
 
 final class ListPattern extends AListPattern {

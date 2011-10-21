@@ -32,6 +32,8 @@ package yeti.lang.compiler.source;
 
 import yeti.lang.Core;
 import yeti.lang.Fun;
+import yeti.lang.Struct;
+import yeti.lang.Struct3;
 
 import java.io.*;
 
@@ -125,10 +127,14 @@ public final class SourceReader {
 	}
 
 	//The TypePrettyPrinter wants to use this.
-	static Struct pair(String name1, Object value1, String name2, Object value2) {
-		// low-level implementation-specific struct, don't do that ;)
-		return new Struct3(new String[] { name1, name2 }, new Object[] {value1, value2});
-	}
+    static Struct pair(String name1, Object value1,
+                       String name2, Object value2) {
+        // low-level implementation-specific struct, don't do that ;)
+        Struct3 result = new Struct3(new String[] { name1, name2 }, null);
+        result._0 = value1;
+        result._1 = value2;
+        return result;
+    }
 
 }
 

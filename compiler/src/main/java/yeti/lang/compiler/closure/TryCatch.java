@@ -31,15 +31,15 @@
 
 package yeti.lang.compiler.closure;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import yeti.lang.compiler.code.BindRef;
 import yeti.lang.compiler.code.Binder;
 import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.Ctx;
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.renamed.asm3.Label;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Since the stupid JVM discards local stack when catching exceptions,
@@ -101,14 +101,16 @@ final class TryCatch extends CapturingClosure {
         genClosureInit(mc);
         int retVar = -1;
         if (cleanupStart != null) {
-            retVar = mc.localVarCount++;
+            retVar = mc.getLocalVarCount();
+            mc.incrementLocalVarCountBy(1);
             mc.insn(ACONST_NULL);
             mc.varInsn(ASTORE, retVar); // silence the JVM verifier...
         }
         mc.visitLabel(codeStart);
         block.gen(mc);
         mc.visitLabel(codeEnd);
-        exVar = mc.localVarCount++;
+        exVar = mc.getLocalVarCount();
+        mc.incrementLocalVarCountBy(1);
         if (cleanupStart != null) {
             Label goThrow = new Label();
             mc.visitLabel(cleanupEntry);
@@ -129,7 +131,7 @@ final class TryCatch extends CapturingClosure {
             Catch c = (Catch) catches.get(i);
             Label catchStart = new Label();
             mc.tryCatchBlock(codeStart, codeEnd, catchStart,
-                                  c.type.javaType.className());
+                                  c.getType().getJavaType().className());
             Label catchEnd = null;
             if (cleanupStart != null) {
                 catchEnd = new Label();

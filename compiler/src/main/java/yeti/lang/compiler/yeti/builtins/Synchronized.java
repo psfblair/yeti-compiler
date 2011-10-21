@@ -31,14 +31,11 @@
 
 package yeti.lang.compiler.yeti.builtins;
 
-import com.sun.org.apache.bcel.internal.generic.*;
+import yeti.lang.compiler.closure.Apply;
 import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.Ctx;
 import yeti.lang.compiler.yeti.type.YetiType;
-import yeti.renamed.asm3.*;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import yeti.renamed.asm3.Label;
 
 final class Synchronized extends Core2 {
     Synchronized(int line) {
@@ -70,7 +67,8 @@ final class Synchronized extends Core2 {
         // yeah, sure...
         ctx.tryCatchBlock(startCleanup, endCleanup, startCleanup, null);
 
-        int exceptionVar = ctx.localVarCount++;
+        int exceptionVar = ctx.getLocalVarCount();
+        ctx.incrementLocalVarCountBy(1);
         ctx.visitLabel(startCleanup);
         ctx.varInsn(ASTORE, exceptionVar);
         ctx.load(monitorVar).insn(MONITOREXIT);

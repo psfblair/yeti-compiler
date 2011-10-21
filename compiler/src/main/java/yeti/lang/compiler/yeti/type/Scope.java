@@ -1,17 +1,20 @@
 package yeti.lang.compiler.yeti.type;
 
-class Scope {
-    yeti.lang.compiler.Scope outer;
+import yeti.lang.compiler.closure.Closure;
+import yeti.lang.compiler.code.Binder;
+
+public class Scope {
+    Scope outer;
     String name;
     Binder binder;
-    yeti.lang.compiler.YType[] free;
+    YType[] free;
     Closure closure; // non-null means outer scopes must be proxied
-    yeti.lang.compiler.YetiType.ClassBinding importClass;
-    yeti.lang.compiler.YType[] typeDef;
+    YetiType.ClassBinding importClass;
+    YType[] typeDef;
 
-    yeti.lang.compiler.YetiType.ScopeCtx ctx;
+    YetiType.ScopeCtx ctx;
 
-    Scope(yeti.lang.compiler.Scope outer, String name, Binder binder) {
+    Scope(Scope outer, String name, Binder binder) {
         this.outer = outer;
         this.name = name;
         this.binder = binder;

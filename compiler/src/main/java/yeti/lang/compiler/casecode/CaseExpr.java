@@ -33,10 +33,12 @@ package yeti.lang.compiler.casecode;
 
 import yeti.lang.compiler.code.Code;
 import yeti.lang.compiler.code.Ctx;
-import yeti.renamed.asm3.*;
-import java.util.*;
+import yeti.renamed.asm3.Label;
 
-final class CaseExpr extends Code {
+import java.util.ArrayList;
+import java.util.List;
+
+public final class CaseExpr extends Code {
     private int totalParams;
     private Code caseValue;
     private List choices = new ArrayList();

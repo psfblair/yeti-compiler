@@ -46,8 +46,8 @@ class XNode extends Node {
     XNode(String kind, Node expr) {
         this.kind = kind;
         this.expr = new Node[] { expr };
-        line = expr.line;
-        col = expr.col;
+        setLine(expr.getLine());
+        setCol(expr.getCol());
     }
 
     String str() {
@@ -78,8 +78,8 @@ class XNode extends Node {
                 Bind bind = new Bind();
                 bind.name = s.sym;
                 bind.expr = s;
-                bind.col = s.col;
-                bind.line = s.line;
+                bind.setCol(s.getCol());
+                bind.setLine(s.getLine());
                 bind.noRec = true;
                 if (op != null)
                     bind.type = op.type;
@@ -92,8 +92,8 @@ class XNode extends Node {
     static XNode lambda(Node arg, Node expr, Node name) {
         XNode lambda = new XNode("lambda", name == null
             ? new Node[] { arg, expr } : new Node[] { arg, expr, name });
-        lambda.line = arg.line;
-        lambda.col = arg.col;
+        lambda.setLine(arg.getLine());
+        lambda.setCol(arg.getCol());
         return lambda;
     }
 }

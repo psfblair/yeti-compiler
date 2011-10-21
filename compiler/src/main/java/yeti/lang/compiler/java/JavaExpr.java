@@ -31,8 +31,15 @@
 
 package yeti.lang.compiler.java;
 
+import yeti.lang.compiler.closure.Capture;
+import yeti.lang.compiler.closure.CaptureWrapper;
+import yeti.lang.compiler.code.BindRef;
 import yeti.lang.compiler.code.Code;
-import yeti.renamed.asm3.*;
+import yeti.lang.compiler.code.Ctx;
+import yeti.lang.compiler.code.NumericConstant;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
+import yeti.renamed.asm3.Label;
 
 public class JavaExpr extends Code {
     Code object;
@@ -51,18 +58,18 @@ public class JavaExpr extends Code {
     private static void convert(Ctx ctx, YType given, YType argType) {
         given = given.deref();
         argType = argType.deref();
-        String descr = argType.javaType == null
-                        ? "" : argType.javaType.description;
-        if (argType.type == YetiType.JAVA_ARRAY &&
-            given.type == YetiType.JAVA_ARRAY) {
+        String descr = argType.getJavaType() == null
+                        ? "" : argType.getJavaType().getDescription();
+        if (argType.getType() == YetiType.JAVA_ARRAY &&
+            given.getType() == YetiType.JAVA_ARRAY) {
             ctx.typeInsn(CHECKCAST, JavaType.descriptionOf(argType));
             return; // better than thinking, that array was given...
                     // still FIXME for a case of different arrays
         }
-        if (given.type != YetiType.JAVA &&
-            (argType.type == YetiType.JAVA_ARRAY ||
-             argType.type == YetiType.JAVA &&
-                argType.javaType.isCollection())) {
+        if (given.getType() != YetiType.JAVA &&
+            (argType.getType() == YetiType.JAVA_ARRAY ||
+             argType.getType() == YetiType.JAVA &&
+                argType.getJavaType().isCollection())) {
             Label retry = new Label(), end = new Label();
             ctx.typeInsn(CHECKCAST, "yeti/lang/AIter"); // i
             String tmpClass = descr != "Ljava/lang/Set;"
@@ -83,8 +90,8 @@ public class JavaExpr extends Code {
                                 "first", "()Ljava/lang/Object;");
             YType t = null;
             if (argType.param.length != 0 &&
-                ((t = argType.param[0]).type != YetiType.JAVA ||
-                 t.javaType.description.length() > 1)) {
+                ((t = argType.param[0]).getType() != YetiType.JAVA ||
+                 t.getJavaType().getDescription().length() > 1)) {
                 convert(ctx, given.param[0], argType.param[0]);
             }
             // aiav
@@ -97,40 +104,41 @@ public class JavaExpr extends Code {
             ctx.jumpInsn(IFNONNULL, retry); // ai
             ctx.visitLabel(end);
             ctx.insn(POP); // a
-            if (argType.type != YetiType.JAVA_ARRAY)
+            if (argType.getType() != YetiType.JAVA_ARRAY)
                 return; // a - List/Set
 
             String s = "";
             YType argArrayType = argType;
-            while ((argType = argType.param[0]).type ==
+            while ((argType = argType.param[0]).getType() ==
                         YetiType.JAVA_ARRAY) {
                 s += "[";
                 argArrayType = argType;
             }
             String arrayPrefix = s;
-            if (s == "" && argType.javaType.description.length() != 1) {
-                s = argType.javaType.className();
+            if (s == "" && argType.getJavaType().getDescription().length() != 1) {
+                s = argType.getJavaType().className();
             } else {
-                s += argType.javaType.description;
+                s += argType.getJavaType().getDescription();
             }
             ctx.insn(DUP); // aa
             ctx.methodInsn(INVOKEVIRTUAL, tmpClass,
                                 "size", "()I"); // an
 
-            if (t.type != YetiType.JAVA ||
-                (descr = t.javaType.description).length() != 1) {
+            if (t.getType() != YetiType.JAVA ||
+                (descr = t.getJavaType().getDescription()).length() != 1) {
                 ctx.typeInsn(ANEWARRAY, s); // aA
                 ctx.methodInsn(INVOKEVIRTUAL, tmpClass, "toArray",
                     "([Ljava/lang/Object;)[Ljava/lang/Object;");
                 if (!s.equals("java/lang/Object")) {
                     ctx.typeInsn(CHECKCAST,
-                        arrayPrefix + "[" + argType.javaType.description);
+                        arrayPrefix + "[" + argType.getJavaType().getDescription());
                 }
                 return; // A - object array
             }
 
             // emulate a fucking for loop to fill primitive array
-            int index = ctx.localVarCount++;
+            int index = ctx.getLocalVarCount();
+            ctx.incrementLocalVarCountBy(1);
             Label next = new Label(), done = new Label();
             ctx.insn(DUP); // ann
             ctx.varInsn(ISTORE, index); // an
@@ -155,7 +163,7 @@ public class JavaExpr extends Code {
             ctx.varInsn(ILOAD, index); // AaAvn
             ctx.insn(SWAP); // AaAnv
             int insn = BASTORE;
-            switch (argType.javaType.description.charAt(0)) {
+            switch (argType.getJavaType().getDescription().charAt(0)) {
                 case 'D': insn = DASTORE; break;
                 case 'F': insn = FASTORE; break;
                 case 'I': insn = IASTORE; break;
@@ -169,7 +177,7 @@ public class JavaExpr extends Code {
             return; // A - primitive array
         }
 
-        if (given.type == YetiType.STR) {
+        if (given.getType() == YetiType.STR) {
             ctx.typeInsn(CHECKCAST, "java/lang/String");
             ctx.insn(DUP);
             ctx.fieldInsn(GETSTATIC, "yeti/lang/Core", "UNDEF_STR",
@@ -182,11 +190,11 @@ public class JavaExpr extends Code {
             return;
         }
 
-        if (given.type != YetiType.NUM ||
+        if (given.getType() != YetiType.NUM ||
             descr == "Ljava/lang/Object;" ||
             descr == "Ljava/lang/Number;") {
             if (descr != "Ljava/lang/Object;") {
-                ctx.typeInsn(CHECKCAST, argType.javaType.className());
+                ctx.typeInsn(CHECKCAST, argType.getJavaType().className());
             }
             return;
         }
@@ -204,7 +212,7 @@ public class JavaExpr extends Code {
         }
         String newInstr = null;
         if (descr.startsWith("Ljava/lang/")) {
-            newInstr = argType.javaType.className();
+            newInstr = argType.getJavaType().className();
             ctx.typeInsn(NEW, newInstr);
             ctx.insn(DUP_X1);
             ctx.insn(SWAP);
@@ -234,7 +242,7 @@ public class JavaExpr extends Code {
 
     // MethodCall overrides it
     void visitInvoke(Ctx ctx, int invokeInsn) {
-        ctx.methodInsn(invokeInsn, method.classType.javaType.className(),
+        ctx.methodInsn(invokeInsn, method.classType.getJavaType().className(),
                             method.name, method.descr(null));
     }
 
@@ -249,7 +257,7 @@ public class JavaExpr extends Code {
                 if (cw == null) {
                     arg.gen(ctx);
                     ctx.captureCast(arg instanceof Capture
-                        ? ((Capture) arg).captureType() : javaType(arg.type));
+                        ? ((Capture) arg).captureType() : javaType(arg.getType()));
                 } else {
                     cw.genPreGet(ctx);
                 }
@@ -257,28 +265,28 @@ public class JavaExpr extends Code {
         }
         ctx.visitLine(line);
         visitInvoke(ctx, invokeInsn);
-        JavaType jt = method.returnType.javaType;
-        if (jt != null && jt.description.charAt(0) == 'L')
+        JavaType jt = method.returnType.getJavaType();
+        if (jt != null && jt.getDescription().charAt(0) == 'L')
             ctx.forceType(jt.className());
     }
 
     static void convertedArg(Ctx ctx, Code arg, YType argType, int line) {
         String desc;
         if (arg instanceof NumericConstant &&
-            (argType = argType.deref()).type == YetiType.JAVA &&
-            ((desc = argType.javaType.description) == "I" || desc == "J") &&
+            (argType = argType.deref()).getType() == YetiType.JAVA &&
+            ((desc = argType.getJavaType().getDescription()) == "I" || desc == "J") &&
             ((NumericConstant) arg).genInt(ctx, desc == "I")) {
             return; // integer arguments can be directly generated
         }
         if (genRawArg(ctx, arg, argType, line))
-            convert(ctx, arg.type, argType);
+            convert(ctx, arg.getType(), argType);
     }
 
     private static boolean genRawArg(Ctx ctx, Code arg,
                                      YType argType, int line) {
-        YType given = arg.type.deref();
+        YType given = arg.getType().deref();
         String descr =
-            argType.javaType == null ? null : argType.javaType.description;
+            argType.getJavaType() == null ? null : argType.getJavaType().getDescription();
         if (descr == "Z") {
             // boolean
             Label end = new Label(), lie = new Label();
@@ -291,7 +299,7 @@ public class JavaExpr extends Code {
             return false;
         }
         arg.gen(ctx);
-        if (given.type == YetiType.UNIT) {
+        if (given.getType() == YetiType.UNIT) {
             if (!(arg instanceof UnitConstant)) {
                 ctx.insn(POP);
                 ctx.insn(ACONST_NULL);
@@ -306,8 +314,8 @@ public class JavaExpr extends Code {
                     "java/lang/String", "charAt", "(I)C");
             return false;
         }
-        if (argType.type == YetiType.JAVA_ARRAY &&
-            given.type == YetiType.STR) {
+        if (argType.getType() == YetiType.JAVA_ARRAY &&
+            given.getType() == YetiType.STR) {
             ctx.typeInsn(CHECKCAST, "java/lang/String");
             ctx.methodInsn(INVOKEVIRTUAL,
                 "java/lang/String", "toCharArray", "()[C");
@@ -316,8 +324,8 @@ public class JavaExpr extends Code {
         if (arg instanceof StringConstant)
             return false;
         // conversion from array to list
-        if (argType.type == YetiType.MAP && given.type == YetiType.JAVA_ARRAY) {
-            String javaItem = given.param[0].javaType.description;
+        if (argType.getType() == YetiType.MAP && given.getType() == YetiType.JAVA_ARRAY) {
+            String javaItem = given.param[0].getJavaType().getDescription();
             if (javaItem.length() == 1) {
                 String arrayType = "[".concat(javaItem);
                 ctx.typeInsn(CHECKCAST, arrayType);
@@ -329,7 +337,7 @@ public class JavaExpr extends Code {
             ctx.typeInsn(CHECKCAST, "[Ljava/lang/Object;");
             ctx.insn(DUP);
             ctx.jumpInsn(IFNULL, isNull);
-            if (argType.param[1].deref().type == YetiType.NONE) {
+            if (argType.param[1].deref().getType() == YetiType.NONE) {
                 ctx.insn(DUP);
                 ctx.insn(ARRAYLENGTH);
                 ctx.jumpInsn(IFEQ, isNull);
@@ -341,7 +349,7 @@ public class JavaExpr extends Code {
             ctx.jumpInsn(GOTO, end);
             ctx.visitLabel(isNull);
             ctx.insn(POP);
-            if (argType.param[1].deref().type == YetiType.NONE) {
+            if (argType.param[1].deref().getType() == YetiType.NONE) {
                 ctx.insn(ACONST_NULL);
             } else {
                 ctx.typeInsn(NEW, "yeti/lang/MList");
@@ -351,23 +359,23 @@ public class JavaExpr extends Code {
             ctx.visitLabel(end);
             return false;
         }
-        return argType.type == YetiType.JAVA ||
-               argType.type == YetiType.JAVA_ARRAY;
+        return argType.getType() == YetiType.JAVA ||
+               argType.getType() == YetiType.JAVA_ARRAY;
     }
 
     static void genValue(Ctx ctx, Code arg, YType argType, int line) {
         genRawArg(ctx, arg, argType, line);
-        if (arg.type.deref().type == YetiType.NUM &&
-            argType.javaType.description.length() == 1) {
-            convertNum(ctx, argType.javaType.description);
+        if (arg.getType().deref().getType() == YetiType.NUM &&
+            argType.getJavaType().getDescription().length() == 1) {
+            convertNum(ctx, argType.getJavaType().getDescription());
         }
     }
 
     static void convertValue(Ctx ctx, YType t) {
-        if (t.type != YetiType.JAVA) {
+        if (t.getType() != YetiType.JAVA) {
             return; // array, no automatic conversions
         }
-        String descr = t.javaType.description;
+        String descr = t.getJavaType().getDescription();
         if (descr == "V") {
             ctx.insn(ACONST_NULL);
         } else if (descr == "Ljava/lang/String;") {

@@ -112,8 +112,7 @@ public class ClassFinder {
         if (in == null)
             return null;
         try {
-            new ClassReader(in).accept(t, null,
-                    ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES);
+            new ClassReader(in).accept(t, null, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES);
         } catch (IOException ex) {
             return null;
         }

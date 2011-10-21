@@ -7,7 +7,7 @@ final class BooleanConstant extends BindRef {
     boolean val;
 
     BooleanConstant(boolean val) {
-        type = YetiType.BOOL_TYPE;
+        setType(YetiType.BOOL_TYPE);
         this.val = val;
     }
 

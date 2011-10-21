@@ -12,11 +12,11 @@ public abstract class BindRef extends Code {
         return binder;
     }
 
-    protected void setBinder(Binder binder) {
+    public void setBinder(Binder binder) {
         this.binder = binder;
     }
 
-    protected BindExpr.Ref getOrigin() {
+    public BindExpr.Ref getOrigin() {
         return origin;
     }
 
@@ -33,7 +33,7 @@ public abstract class BindRef extends Code {
     }
 
     // some bindrefs care about being captured. most wont.
-    protected CaptureWrapper capture() {
+    public CaptureWrapper capture() {
         return null;
     }
 
@@ -43,7 +43,7 @@ public abstract class BindRef extends Code {
         return this;
     }
 
-    Code unref(boolean force) {
+    public Code unref(boolean force) {
         return null;
     }
 

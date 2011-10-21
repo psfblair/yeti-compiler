@@ -28,4 +28,16 @@ public final class StructField implements Opcodes {
     public boolean isMutable() {
         return mutable;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setProperty(int property) {
+        this.property = property;
+    }
+
+    public void setMutable(boolean mutable) {
+        this.mutable = mutable;
+    }
 }

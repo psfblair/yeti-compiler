@@ -31,8 +31,9 @@
 package yeti.lang.compiler.parser;
 
 public class ParseException extends RuntimeException {
-    int line;
-    int col;
+
+    private int line;
+    private int col;
     String what;
     
     public ParseException(int line, int col, String what) {
@@ -45,11 +46,19 @@ public class ParseException extends RuntimeException {
         this(null, pos, what);
     }
 
+    private void setLine(int line) {
+        this.line = line;
+    }
+
+    private void setCol(int col) {
+        this.col = col;
+    }
+
     private ParseException(Throwable ex, Node pos, String what) {
         super(ex);
         if (pos != null) {
-            line = pos.line;
-            col = pos.col;
+            line = pos.getLine();
+            col = pos.getCol();
         }
         this.what = what;
     }

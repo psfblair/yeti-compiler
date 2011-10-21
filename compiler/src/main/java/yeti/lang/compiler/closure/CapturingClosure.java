@@ -35,7 +35,7 @@ import yeti.lang.compiler.code.BindRef;
 import yeti.lang.compiler.code.Ctx;
 
 public abstract class CapturingClosure extends AClosure {
-    Capture captures;
+    private Capture captures;
 
     Capture captureRef(BindRef code) {
         for (Capture c = captures; c != null; c = c.next)
@@ -59,6 +59,10 @@ public abstract class CapturingClosure extends AClosure {
 
     public BindRef refProxy(BindRef code) {
         return code.flagop(DIRECT_BIND) ? code : captureRef(code);
+    }
+
+    public Capture getCaptures() {
+        return captures;
     }
 
     // Called by mergeCaptures to initialize a capture.

@@ -1,7 +1,6 @@
 package yeti.lang.compiler.yeti.typeattr;
 
 import yeti.lang.compiler.CompileException;
-import yeti.renamed.asm3.*;
 
 import java.io.InputStream;
 

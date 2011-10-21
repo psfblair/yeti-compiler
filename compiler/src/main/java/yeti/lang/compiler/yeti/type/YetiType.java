@@ -32,27 +32,22 @@
 
 package yeti.lang.compiler.yeti.type;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-
 import yeti.lang.compiler.CompileException;
 import yeti.lang.compiler.YetiC;
 import yeti.lang.compiler.parser.YetiParser;
 
+import java.util.*;
+
 public class YetiType implements YetiParser {
     public static final int VAR  = 0;
-    static final int UNIT = 1;
+    public static final int UNIT = 1;
     public static final int STR  = 2;
     public static final int NUM  = 3;
-    static final int BOOL = 4;
+    public static final int BOOL = 4;
     public static final int CHAR = 5;
-    static final int NONE = 6;
+    public static final int NONE = 6;
     public static final int LIST_MARKER = 7;
-    static final int MAP_MARKER  = 8;
+    public static final int MAP_MARKER  = 8;
     public static final int FUN  = 9; // a -> b
     public static final int MAP  = 10; // value, index, (LIST | MAP)
     public static final int STRUCT = 11;
@@ -62,21 +57,21 @@ public class YetiType implements YetiParser {
 
     public static final int FL_ORDERED_REQUIRED = 1;
     public static final int FL_TAINTED_VAR = 2;
-    static final int FL_ERROR_IS_HERE = 0x100;
+    protected static final int FL_ERROR_IS_HERE = 0x100;
     static final int FL_ANY_PATTERN = 0x4000;
     static final int FL_PARTIAL_PATTERN  = 0x8000;
 
     static final int FIELD_NON_POLYMORPHIC = 1;
     public static final int FIELD_MUTABLE = 2;
 
-    static final YType[] NO_PARAM = {};
+    public static final YType[] NO_PARAM = {};
     public static final YType UNIT_TYPE = new YType(UNIT, NO_PARAM);
     public static final YType NUM_TYPE  = new YType(NUM,  NO_PARAM);
     public static final YType STR_TYPE  = new YType(STR,  NO_PARAM);
     public static final YType BOOL_TYPE = new YType(BOOL, NO_PARAM);
     static final YType CHAR_TYPE = new YType(CHAR, NO_PARAM);
-    static final YType NO_TYPE   = new YType(NONE, NO_PARAM);
-    static final YType LIST_TYPE = new YType(LIST_MARKER, NO_PARAM);
+    public static final YType NO_TYPE   = new YType(NONE, NO_PARAM);
+    public static final YType LIST_TYPE = new YType(LIST_MARKER, NO_PARAM);
     static final YType MAP_TYPE  = new YType(MAP_MARKER, NO_PARAM);
     static final YType ORDERED = orderedVar(1);
     static final YType A = new YType(1);
@@ -118,14 +113,14 @@ public class YetiType implements YetiParser {
     static final YType STR2_PRED_TYPE = fun2Arg(STR_TYPE, STR_TYPE, BOOL_TYPE);
     public static final YType SYNCHRONIZED_TYPE = fun2Arg(A, fun(UNIT_TYPE, B), B);
     static final YType CLASS_TYPE = new YType("Ljava/lang/Class;");
-    static final YType OBJECT_TYPE = new YType("Ljava/lang/Object;");
+    public static final YType OBJECT_TYPE = new YType("Ljava/lang/Object;");
     static final YType WITH_EXIT_TYPE = fun(fun(fun(A, B), A), A);
 
     public static final YType[] PRIMITIVES =
         { null, UNIT_TYPE, STR_TYPE, NUM_TYPE, BOOL_TYPE, CHAR_TYPE,
           NO_TYPE, LIST_TYPE, MAP_TYPE };
 
-    static final String[] TYPE_NAMES =
+    protected static final String[] TYPE_NAMES =
         { "var", "()", "string", "number", "boolean", "char",
           "none", "list", "hash", "fun", "list", "struct", "variant",
           "object" };
@@ -304,7 +299,7 @@ public class YetiType implements YetiParser {
         }
     }
 
-    static final class ScopeCtx {
+    public static final class ScopeCtx {
         String packageName;
         String className;
     }

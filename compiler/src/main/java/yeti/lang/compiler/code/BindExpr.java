@@ -68,7 +68,7 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             return var ? BindExpr.this : null;
         }
 
-        Code unref(boolean force) {
+        public Code unref(boolean force) {
             return force || directBind ? getSt() : null;
         }
 

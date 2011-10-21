@@ -1,10 +1,9 @@
 package yeti.lang.compiler.typeprettyprinter;
 
-import yeti.lang.AList;
-import yeti.lang.Core;
-import yeti.lang.LList;
-import yeti.lang.MList;
+import yeti.lang.*;
 import yeti.lang.compiler.YetiC;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -14,8 +13,8 @@ import java.util.Map;
 class TypeDescr extends YetiType {
     private int type;
     private String name;
-    private yeti.lang.compiler.TypeDescr value;
-    private yeti.lang.compiler.TypeDescr prev;
+    private TypeDescr value;
+    private TypeDescr prev;
     private String alias;
     private Map properties;
 
@@ -27,7 +26,7 @@ class TypeDescr extends YetiType {
         if (type == 0)
             return new Tag(name, "Simple");
         AList l = null;
-        for (yeti.lang.compiler.TypeDescr i = value; i != null; i = i.prev)
+        for (TypeDescr i = value; i != null; i = i.prev)
             if (i.properties != null) {
                 i.properties.put("type", i.force());
                 l = new LList(new GenericStruct(i.properties), l);
@@ -53,11 +52,11 @@ class TypeDescr extends YetiType {
         return new Tag(YetiC.pair("alias", alias, "type", res), "Alias");
     }
 
-    static Tag yetiType(YType t, yeti.lang.compiler.TypePattern defs) {
+    static Tag yetiType(YType t, TypePattern defs) {
         return prepare(t, defs, new HashMap(), new HashMap()).force();
     }
 
-    static Tag typeDef(YType[] def, MList param, yeti.lang.compiler.TypePattern defs) {
+    static Tag typeDef(YType[] def, MList param, TypePattern defs) {
         Map vars = new HashMap();
         for (int i = 0, n = 0; i < def.length - 1; ++i) {
             String name = def[i].doc instanceof String
@@ -68,8 +67,8 @@ class TypeDescr extends YetiType {
         return prepare(def[def.length - 1], defs, vars, new HashMap()).force();
     }
 
-    private static void hdescr(yeti.lang.compiler.TypeDescr descr, YType tt,
-                               yeti.lang.compiler.TypePattern defs, Map vars, Map refs) {
+    private static void hdescr(TypeDescr descr, YType tt,
+                               TypePattern defs, Map vars, Map refs) {
         Map m = new java.util.TreeMap();
         if (tt.partialMembers != null)
             m.putAll(tt.partialMembers);
@@ -97,7 +96,7 @@ class TypeDescr extends YetiType {
                     ? "." :
                 tt.partialMembers != null && tt.partialMembers.containsKey(name)
                     ? "`" : "");
-            yeti.lang.compiler.TypeDescr field = prepare(t, defs, vars, refs);
+            TypeDescr field = prepare(t, defs, vars, refs);
             field.properties = it;
             field.prev = descr.value;
             descr.value = field;
@@ -127,30 +126,30 @@ class TypeDescr extends YetiType {
         return v;
     }
 
-    private static yeti.lang.compiler.TypeDescr prepare(YType t, yeti.lang.compiler.TypePattern defs,
+    private static TypeDescr prepare(YType t, TypePattern defs,
                                      Map vars, Map refs) {
-        final int type = t.type;
+        final int type = t.getType();
         if (type == VAR) {
             if (t.ref != null)
                 return prepare(t.ref, defs, vars, refs);
-            return new yeti.lang.compiler.TypeDescr(getVarName(t, vars));
+            return new TypeDescr(getVarName(t, vars));
         }
         if (type < PRIMITIVES.length)
-            return new yeti.lang.compiler.TypeDescr(TYPE_NAMES[type]);
+            return new TypeDescr(TYPE_NAMES[type]);
         if (type == JAVA)
-            return new yeti.lang.compiler.TypeDescr(t.javaType.str());
+            return new TypeDescr(t.getJavaType().str());
         if (type == JAVA_ARRAY)
-            return new yeti.lang.compiler.TypeDescr(prepare(t.param[0], defs, vars, refs)
+            return new TypeDescr(prepare(t.param[0], defs, vars, refs)
                                     .name.concat("[]"));
-        yeti.lang.compiler.TypeDescr descr = (yeti.lang.compiler.TypeDescr) refs.get(t), item;
+        TypeDescr descr = (TypeDescr) refs.get(t), item;
         if (descr != null) {
             if (descr.alias == null)
                 descr.alias = getVarName(t, vars);
-            return new yeti.lang.compiler.TypeDescr(descr.alias);
+            return new TypeDescr(descr.alias);
         }
-        refs.put(t, descr = new yeti.lang.compiler.TypeDescr(null));
+        refs.put(t, descr = new TypeDescr(null));
         Map defVars = null;
-        yeti.lang.compiler.TypePattern def = null;
+        TypePattern def = null;
         if (defs != null &&
                 (def = defs.match(t, defVars = new IdentityHashMap())) != null
                 && def.end != null) {
@@ -166,17 +165,17 @@ class TypeDescr extends YetiType {
             for (int i = def.end.defvars.length; --i >= 0; ) {
                 t = (YType) param.get(Integer.valueOf(def.end.defvars[i]));
                 item = t != null ? prepare(t, defs, vars, refs)
-                                 : new yeti.lang.compiler.TypeDescr("?");
+                                 : new TypeDescr("?");
                 item.prev = descr.value;
                 descr.value = item;
             }
             return descr;
         }
         descr.type = type;
-        YType[] param = t.param;
+        YType[] param = t.getParam();
         switch (type) {
             case FUN:
-                for (; t.type == FUN; param = t.param) {
+                for (; t.getType() == FUN; param = t.getParam()) {
                     item = prepare(param[0], defs, vars, refs);
                     item.prev = descr.value;
                     descr.value = item;
@@ -196,12 +195,12 @@ class TypeDescr extends YetiType {
                 int n = 1;
                 YType p1 = param[1].deref();
                 YType p2 = param[2].deref();
-                if (p2.type == LIST_MARKER) {
-                    descr.name = p1.type == NONE ? "list" : p1.type == NUM
+                if (p2.getType() == LIST_MARKER) {
+                    descr.name = p1.getType() == NONE ? "list" : p1.getType() == NUM
                                     ? "array" : "list?";
                 } else {
-                    descr.name = p2.type == MAP_MARKER || p1.type != NUM
-                                    && p1.type != VAR ? "hash" : "map";
+                    descr.name = p2.getType() == MAP_MARKER || p1.getType() != NUM
+                                    && p1.getType() != VAR ? "hash" : "map";
                     n = 2;
                 }
                 while (--n >= 0) {

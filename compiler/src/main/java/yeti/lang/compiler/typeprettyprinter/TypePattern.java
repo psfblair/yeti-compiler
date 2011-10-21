@@ -1,23 +1,27 @@
 package yeti.lang.compiler.typeprettyprinter;
 
+import yeti.lang.compiler.yeti.type.Scope;
+import yeti.lang.compiler.yeti.type.YType;
+import yeti.lang.compiler.yeti.type.YetiType;
+
 import java.util.*;
 
 class TypePattern {
     // Integer.MIN_VALUE is type end marker
     // Integer.MAX_VALUE matches any type
     private int[] idx;
-    private yeti.lang.compiler.TypePattern[] next;
+    private TypePattern[] next;
     // struct/variant field match, next[idx.length] when no such field
     private String field;
     private boolean mutable;
     int var; // if var < 0 then match stores type in typeVars as var
-    yeti.lang.compiler.TypeWalk end; // end result
+    TypeWalk end; // end result
 
     TypePattern(int var) {
         this.var = var;
     }
 
-    yeti.lang.compiler.TypePattern match(YType type, Map typeVars) {
+    TypePattern match(YType type, Map typeVars) {
         int i;
 
         type = type.deref();
@@ -37,15 +41,15 @@ class TypePattern {
         }
         if (var < 0)
             typeVars.put(type, Integer.valueOf(var));
-        yeti.lang.compiler.TypePattern pat = next[i];
+        TypePattern pat = next[i];
         if (pat.field == null) {
-            YType[] param = type.param;
+            YType[] param = type.getParam();
             if (param != null)
                 for (i = 0; i < param.length && pat != null; ++i)
                     pat = pat.match(param[i], typeVars);
         } else {
             // TODO check final/partial if necessary
-            Map m = type.finalMembers;
+            Map m = type.getFinalMembers();
             if (m == null)
                 m = type.partialMembers;
             i = m.size();
@@ -54,7 +58,7 @@ class TypePattern {
                     return null;
                 type = (YType) m.get(pat.field);
                 if (type != null &&
-                        type.field == YetiType.FIELD_MUTABLE == mutable) {
+                        type.getField() == YetiType.FIELD_MUTABLE == mutable) {
                     pat = pat.match(type, typeVars);
                 } else {
                     pat = pat.next[pat.idx.length];
@@ -68,29 +72,29 @@ class TypePattern {
         return null;
     }
 
-    static yeti.lang.compiler.TypePattern toPattern(Map typedefs) {
+    static TypePattern toPattern(Map typedefs) {
         int j = 0, varAlloc = 1;
-        yeti.lang.compiler.TypePattern presult = new yeti.lang.compiler.TypePattern(varAlloc);
-        yeti.lang.compiler.TypeWalk[] w = new yeti.lang.compiler.TypeWalk[typedefs.size()];
+        TypePattern presult = new TypePattern(varAlloc);
+        TypeWalk[] w = new TypeWalk[typedefs.size()];
         Map tvars = new IdentityHashMap();
         for (Iterator i = typedefs.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry e = (Map.Entry) i.next();
             YType[] def = (YType[]) e.getValue();
             YType t = def[def.length - 1].deref();
-            if (t.type < YetiType.PRIMITIVES.length)
+            if (t.getType() < YetiType.PRIMITIVES.length)
                 continue;
             for (int k = def.length - 1; --k >= 0; )
                 tvars.put(def[k].deref(), null); // mark as param
-            w[j] = new yeti.lang.compiler.TypeWalk(t, null, tvars, presult);
+            w[j] = new TypeWalk(t, null, tvars, presult);
             w[j].typename = (String) e.getKey();
             w[j++].def = def;
         }
         if (j == 0)
             return null;
-        yeti.lang.compiler.TypeWalk[] wg = new yeti.lang.compiler.TypeWalk[j];
+        TypeWalk[] wg = new TypeWalk[j];
         System.arraycopy(w, 0, wg, 0, j);
         int[] ids = new int[j];
-        yeti.lang.compiler.TypePattern[] patterns = new yeti.lang.compiler.TypePattern[j];
+        TypePattern[] patterns = new TypePattern[j];
         List walkers = new ArrayList();
         walkers.add(wg); // types
         walkers.add(presult); // resulting pattern
@@ -99,12 +103,12 @@ class TypePattern {
             List current = walkers;
             walkers = new ArrayList();
             for (int i = 0, cnt = current.size(); i < cnt; i += 3) {
-                w = (yeti.lang.compiler.TypeWalk[]) current.get(i);
+                w = (TypeWalk[]) current.get(i);
                 Arrays.sort(w);
                 // group by different types
                 // next - target for group in next cycle
-                yeti.lang.compiler.TypePattern next = new yeti.lang.compiler.TypePattern(++varAlloc),
-                    target = (yeti.lang.compiler.TypePattern) current.get(i + 1);
+                TypePattern next = new TypePattern(++varAlloc),
+                    target = (TypePattern) current.get(i + 1);
                 String field = w.length != 0 ? w[0].field : null;
                 int start = 0, n = 0, e;
                 for (j = 1; j <= w.length; ++j) {
@@ -117,12 +121,12 @@ class TypePattern {
                     for (int k = e = start; k < j; ++k)
                         if ((w[e] = w[k].next(tvars, next)) != null)
                             ++e;
-                    wg = new yeti.lang.compiler.TypeWalk[e - start];
+                    wg = new TypeWalk[e - start];
                     System.arraycopy(w, start, wg, 0, wg.length);
                     walkers.add(wg);
                     walkers.add(patterns[n++] = next);
                     walkers.add(tvars);
-                    next = new yeti.lang.compiler.TypePattern(++varAlloc);
+                    next = new TypePattern(++varAlloc);
                     start = j;
                     if (j < w.length &&
                             (field == w[j].field || field.equals(w[j].field)))
@@ -135,16 +139,16 @@ class TypePattern {
                             target.mutable = true;
                         }
                         target.field = field;
-                        target.next = new yeti.lang.compiler.TypePattern[n + 1];
+                        target.next = new TypePattern[n + 1];
                         System.arraycopy(patterns, 0, target.next, 0, n);
                         if (j < w.length) {
                             field = w[j].field;
                             target.next[n] = next;
                             target = next;
-                            next = new yeti.lang.compiler.TypePattern(++varAlloc);
+                            next = new TypePattern(++varAlloc);
                         }
                     } else {
-                        target.next = new yeti.lang.compiler.TypePattern[n];
+                        target.next = new TypePattern[n];
                         System.arraycopy(patterns, 0, target.next, 0, n);
                     }
                     n = 0;
@@ -154,7 +158,7 @@ class TypePattern {
         return presult;
     }
 
-    static yeti.lang.compiler.TypePattern toPattern(Scope scope) {
+    static TypePattern toPattern(Scope scope) {
         Map typedefs = new HashMap();
         for (; scope != null; scope = scope.outer)
             if (scope.typeDef != null) {
