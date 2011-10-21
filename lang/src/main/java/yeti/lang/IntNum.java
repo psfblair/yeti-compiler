@@ -30,10 +30,8 @@
  */
 package yeti.lang;
 
-
 import java.math.BigInteger;
 import java.math.BigDecimal;
-
 
 public final class IntNum extends Num {
     public static final IntNum __2 = new IntNum(-2);

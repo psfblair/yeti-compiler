@@ -32,7 +32,6 @@ package yeti.lang;
 
 import java.io.Serializable;
 
-
 final class RangeIter extends AIter implements Serializable {
     Num n;
     Num last;

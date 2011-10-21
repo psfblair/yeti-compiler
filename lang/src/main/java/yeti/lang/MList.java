@@ -30,10 +30,8 @@
  */
 package yeti.lang;
 
-
 import java.util.Arrays;
 import java.io.Serializable;
-
 
 abstract class AMList extends AList implements Serializable {
     int start;

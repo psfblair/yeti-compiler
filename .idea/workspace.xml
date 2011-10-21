@@ -72,9 +72,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/settings.gradle" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/java/JavaClass.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/defineclass/MethodDesc.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/java/JavaType.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/java/JavaExpr.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/parser/Node.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/parser/Bind.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/parser/ParseException.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/parser/ParseExpr.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/parser/XNode.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/code/UnitConstant.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/struct/StructConstructor.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/struct/WithStruct.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypeDescr.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypePattern.java" />
+        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypeWalk.java" />
         <option value="$PROJECT_DIR$/build.gradle" />
-        <option value="$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/yeti/typeattr/YetiTypeAttr.java" />
       </list>
     </option>
   </component>
@@ -114,17 +127,114 @@
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
       <flattenPackages />
-      <showMembers />
+      <showMembers ProjectPane="false" />
       <showModules />
       <showLibraryContents />
       <hideEmptyPackages />
       <abbreviatePackageNames />
-      <autoscrollToSource />
+      <autoscrollToSource ProjectPane="false" />
       <autoscrollFromSource />
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="Scope">
+        <subPane subId="Production">
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="src">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="src">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="main/java">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="yeti/lang/compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="src">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="main/java">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="yeti/lang/compiler">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="casecode">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -133,49 +243,18 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
           </PATH>
+        </subPane>
+      </pane>
+      <pane id="PackagesPane">
+        <subPane>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="yeti-compiler" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="special" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="yeti-compiler" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="lang" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="yeti-compiler" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="compiler" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="yeti-compiler" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="asm" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Favorites" />
     </panes>
   </component>
@@ -355,6 +434,7 @@
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32934928" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29911375" sideWeight="0.5431607" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
@@ -415,32 +495,110 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/settings.gradle">
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/source/Struct.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="9" selection-start="9" selection-end="9" vertical-scroll-proportion="0.0">
+        <state line="2" column="10" selection-start="46" selection-end="46" vertical-scroll-proportion="0.078947365">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/source/Struct3.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="1" selection-start="2343" selection-end="2343" vertical-scroll-proportion="0.7627119">
+        <state line="2" column="6" selection-start="42" selection-end="42" vertical-scroll-proportion="0.078947365">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/CompileException.java">
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/code/UnitConstant.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="69" selection-start="1892" selection-end="1892" vertical-scroll-proportion="0.40526316">
+        <state line="8" column="11" selection-start="232" selection-end="232" vertical-scroll-proportion="0.27631578">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/struct/StructField.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="19" selection-start="167" selection-end="167" vertical-scroll-proportion="0.23684211">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/yeti/typeattr/YetiTypeAttr.java">
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/struct/WithStruct.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="0" selection-start="1601" selection-end="1601" vertical-scroll-proportion="0.118421055">
+        <state line="26" column="14" selection-start="764" selection-end="764" vertical-scroll-proportion="-0.02631579">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/struct/StructConstructor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="638" column="73" selection-start="23597" selection-end="23597" vertical-scroll-proportion="0.7236842">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypeDescr.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="205" column="51" selection-start="7683" selection-end="7683" vertical-scroll-proportion="6.460084">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypePattern.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="163" column="29" selection-start="6518" selection-end="6525" vertical-scroll-proportion="-2.2457983">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/TypeWalk.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="68" column="62" selection-start="2704" selection-end="2704" vertical-scroll-proportion="-1.0483193">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/writer/CodeWriter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="17" selection-start="1606" selection-end="1606" vertical-scroll-proportion="0.09453782">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/compiler/src/main/java/yeti/lang/compiler/typeprettyprinter/ShowTypeFun.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="63" selection-start="573" selection-end="573" vertical-scroll-proportion="0.5672269">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lang/src/main/java/yeti/lang/AIter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="22" selection-start="1599" selection-end="1599" vertical-scroll-proportion="0.15789473">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="5" selection-start="3109" selection-end="3109" vertical-scroll-proportion="3.868421">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/special/src/main/java/yeti/lang/SpecialLib.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="41" column="13" selection-start="1819" selection-end="1819" vertical-scroll-proportion="0.27631578">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -500,7 +658,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>special</last-edited>
+          <last-edited>lang</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

@@ -33,7 +33,6 @@ package yeti.lang;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
-
 public final class BigNum extends Num {
     private final BigInteger v;
 

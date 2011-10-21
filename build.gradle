@@ -1,5 +1,7 @@
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 
+yeti_project_root = "$project.projectDir"
+
 subprojects {
     apply plugin: 'java'
     group = 'yeti.lang'
@@ -12,8 +14,6 @@ subprojects {
                     'mockit:jmockit:0.999.10'
     }
 }
-
-yeti_project_root = "$project.projectDir"
 
 project(':asm') {
     asmJarDependencyVersion =    '3.1'
@@ -46,8 +46,10 @@ project(':asm') {
         baseName = 'asm-renamer'
     }
 
-    task renameAsmJar(dependsOn: 'compileJava') << {
+    task renameAsmJar(dependsOn: 'compileJava') {
         description = "Overwrites the standard jar task with one that renames the class files in the asm jar."
+    }
+    renameAsmJar.doLast {
         mkdir "$buildDir/libs"
         ant.java(classname: "yeti.lang.Rename", failonerror: true) {
             classpath(path: "$project.buildDir/classes/main")
@@ -63,14 +65,47 @@ project(':asm') {
     }
 }
 
-project(':lang') {
-
-}
-
 project(':special') {
     dependencies {
         compile project(':asm')
     }
+}
+
+project(':lang') {
+    configurations {
+        classGeneratorClasspath
+    }
+    dependencies {
+        compile project(':special')
+        classGeneratorClasspath project(':special'), project(':asm')
+    }
+
+    task generateClasses(dependsOn: ':special:jar') {
+        description = "Generates the Compose, Fun2, and Unsafe classes."
+    }
+    generateClasses.doLast {
+        mkdir "$buildDir/classes/special"
+        ant.java(classname: "yeti.lang.SpecialLib", failonerror: true) {
+            classpath(path: configurations.classGeneratorClasspath.asPath)
+            arg(value: "pre")
+            arg(value: "$buildDir/classes/main")
+        }
+    }
+
+    compileJava.dependsOn('generateClasses')
+
+    task modifyLlistClass(dependsOn: 'compileJava') {
+        description = "Modifies the LList class with the LList adapter."
+    }
+    modifyLlistClass.doLast {
+        ant.java(classname: "yeti.lang.SpecialLib", failonerror: true) {
+            classpath(path: configurations.classGeneratorClasspath.asPath)
+            arg(value: "tr")
+            arg(value: "$buildDir/classes/main")
+        }
+    }
+
+    jar.dependsOn('modifyLlistClass')
 }
 
 project(':compiler') {
@@ -84,7 +119,7 @@ project(':compiler') {
 // IntelliJ IDEA configuration sync
 /*
 task intellijSync {
-    description = "Adds gradle dependecies to IntelliJ project library"
+    description = "Adds gradle dependencies to IntelliJ project library"
 
     final def librariesDir = new File("$yeti_project_root/.idea${File.separator}libraries")
     librariesDir.mkdirs()

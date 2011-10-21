@@ -32,7 +32,6 @@ package yeti.lang;
 
 import java.math.BigInteger;
 
-
 public final class FloatNum extends Num {
     private final double v;
 

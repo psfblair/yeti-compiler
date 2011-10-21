@@ -1,9 +1,9 @@
 // ex: se sts=4 sw=4 expandtab:
 
-/*
- * Yeti core library.
+/**
+ * Yeti core library - Selector function.
  *
- * Copyright (c) 2007,2008 Madis Janson
+ * Copyright (c) 2008 Madis Janson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,14 @@
  */
 package yeti.lang;
 
+public final class Selector extends Fun {
+    private final String name;
 
-/** Yeti core library - Map list. */
-final class MapList extends LList {
-    private boolean mappedRest;
-    private AIter src;
-    private Fun f;
-
-    public MapList(AIter src, Fun f) {
-        super(f.apply(src.first()), null);
-        this.src = src;
-        this.f = f;
+    public Selector(String aName) {
+        name = aName;
     }
 
-    public synchronized AList rest() {
-        if (!mappedRest) {
-            AIter i = src.next();
-            rest = i == null ? null : new MapList(i, f);
-            src = null;
-            f = null;
-            mappedRest = true;
-        }
-        return rest;
+    public final Object apply(Object value) {
+        return ((Struct) value).get(name);
     }
 }

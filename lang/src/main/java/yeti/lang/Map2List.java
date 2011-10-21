@@ -3,7 +3,7 @@
 /*
  * Yeti core library.
  *
- * Copyright (c) 2007,2008,2009 Madis Janson
+ * Copyright (c) 2007,2008 Madis Janson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,30 @@
  */
 package yeti.lang;
 
+/** Yeti core library - Map 2 lists. */
+final class Map2List extends LList {
+    private boolean mappedRest;
+    private AIter src;
+    private AIter src2;
+    private Fun f;
 
-/** Yeti core library - List. */
-public abstract class AList extends AIter implements Comparable, Coll {
-    /**
-     * Return rest of the list. Must not modify the current list.
-     */
-    public abstract AList rest();
-
-    public abstract void forEach(Object f);
-
-    public abstract Object fold(Fun f, Object v);
-
-    public abstract AList reverse();
-
-    public abstract Num index(Object v);
-
-    public abstract AList sort();
-    
-    public abstract AList smap(Fun f);
-
-    public AList map(Fun f) {
-        return new MapList(this, f);
+    public Map2List(Fun f, AIter src, AIter src2) {
+        super(((Fun) f.apply(src.first())).apply(src2.first()), null);
+        this.src = src;
+        this.src2 = src2;
+        this.f = f;
     }
 
-    public AList find(Fun pred) {
-        AList l = this;
-        while (l != null && pred.apply(l.first()) != Boolean.TRUE)
-            l = l.rest();
-        return l;
-    }
-
-    public AList sort(Fun isLess) {
-        return new MList(this).asort(isLess);
-    }
-
-    public AList asList() {
-        return this;
+    public synchronized AList rest() {
+        if (!mappedRest) {
+            AIter i = src.next();
+            AIter j = src2.next();
+            rest = i == null || j == null ? null : new Map2List(f, i, j);
+            src = null;
+            src2 = null;
+            f = null;
+            mappedRest = true;
+        }
+        return rest;
     }
 }

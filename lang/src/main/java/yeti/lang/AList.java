@@ -30,36 +30,41 @@
  */
 package yeti.lang;
 
-
-/** Yeti core library - ByKey. */
-public interface ByKey {
+/** Yeti core library - List. */
+public abstract class AList extends AIter implements Comparable, Coll {
     /**
-     * Get object by key. Throw an Exception on error.
+     * Return rest of the list. Must not modify the current list.
      */
-    Object vget(Object key);
+    public abstract AList rest();
 
-    /**
-     * Put object by key.
-     */
-    Object put(Object key, Object value);
+    public abstract void forEach(Object f);
 
-    /**
-     * Remove object by key.
-     */
-    Object remove(Object key);
+    public abstract Object fold(Fun f, Object v);
 
-    /**
-     * Remove object by key.
-     */
-    void removeAll(AList keys);
+    public abstract AList reverse();
 
-    /**
-     * Has a given key.
-     */
-    boolean containsKey(Object key);
+    public abstract Num index(Object v);
 
-    /**
-     * Set a default function.
-     */
-    void setDefault(Fun fun);
+    public abstract AList sort();
+    
+    public abstract AList smap(Fun f);
+
+    public AList map(Fun f) {
+        return new MapList(this, f);
+    }
+
+    public AList find(Fun pred) {
+        AList l = this;
+        while (l != null && pred.apply(l.first()) != Boolean.TRUE)
+            l = l.rest();
+        return l;
+    }
+
+    public AList sort(Fun isLess) {
+        return new MList(this).asort(isLess);
+    }
+
+    public AList asList() {
+        return this;
+    }
 }

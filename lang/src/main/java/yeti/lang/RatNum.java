@@ -30,7 +30,6 @@
  */
 package yeti.lang;
 
-
 import java.math.BigInteger;
 
 public final class RatNum extends Num {

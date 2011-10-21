@@ -3,7 +3,7 @@
 /*
  * Yeti core library.
  *
- * Copyright (c) 2007,2008,2009 Madis Janson
+ * Copyright (c) 2007,2008 Madis Janson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,29 @@
  */
 package yeti.lang;
 
+/** Yeti core library - CatSomes. */
+final class CatSomes extends LList {
+    private boolean checked;
+    private AIter src;
 
-/** Yeti core library - a collection. */
-public interface Coll {
-    AList asList();
-    long length();
-    boolean isEmpty();
-    Object copy();
+    public CatSomes(Object v, AIter src) {
+        super(v, null);
+        this.src = src;
+    }
+
+    public static AList filter(AIter src) {
+        Tag t = null;
+        while (src != null && (t = (Tag) src.first()).name != "Some")
+            src = src.next();
+        return src == null ? null : new CatSomes(t.value, src);
+    }
+
+    public synchronized AList rest() {
+        if (!checked) {
+            rest = filter(src.next());
+            src = null;
+            checked = true;
+        }
+        return rest;
+    }
 }

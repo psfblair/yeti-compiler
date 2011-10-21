@@ -30,10 +30,8 @@
  */
 package yeti.lang;
 
-
 import java.math.BigInteger;
 import java.math.BigDecimal;
-
 
 public abstract class Num extends Number implements Comparable {
     public abstract Num add(Num num);
