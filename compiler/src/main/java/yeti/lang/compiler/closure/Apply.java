@@ -78,7 +78,7 @@ public class Apply extends Code {
             }
             sig.append(")Ljava/lang/Object;");
             ctx.visitLine(line);
-            ctx.methodInsn(INVOKESTATIC, f.name,
+            ctx.methodInsn(INVOKESTATIC, f.getName(),
                                 f.bindName, sig.toString());
             return;
         }

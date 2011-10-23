@@ -60,7 +60,7 @@ class TypeWalk implements Comparable {
                 tvar.var = id = -id; // mark used
             return;
         }
-        id = t.type;
+        id = t.getType();
         if (id == YetiType.VAR) {
             if (tvars.containsKey(t)) {
                 id = Integer.MAX_VALUE; // typedef parameter - match anything
@@ -68,7 +68,7 @@ class TypeWalk implements Comparable {
                     p.var = -p.var; // parameters must be saved
             } else if (parent != null && parent.type.getType() == YetiType.MAP &&
                        parent.st > 1 && (parent.st > 2 ||
-                            parent.type.param[2] == YetiType.LIST_TYPE)) {
+                            parent.type.getParam()[2] == YetiType.LIST_TYPE)) {
                 id = Integer.MAX_VALUE; // map kind - match anything
                 return; // and don't associate
             }
@@ -77,8 +77,8 @@ class TypeWalk implements Comparable {
             tvars.put(t, p);
         }
         if (id == YetiType.STRUCT || id == YetiType.VARIANT) {
-            fieldMap = t.finalMembers != null ? t.finalMembers
-                                              : t.partialMembers;
+            fieldMap = t.getFinalMembers() != null ? t.getFinalMembers()
+                                              : t.getPartialMembers();
             fields = (String[])
                 fieldMap.keySet().toArray(new String[fieldMap.size()]);
             Arrays.sort(fields);
@@ -99,13 +99,13 @@ class TypeWalk implements Comparable {
             return null;
         }
         if (fields == null) {
-            if (type.param != null && st < type.param.length)
-                return new TypeWalk(type.param[st++], this, tvars, pattern);
+            if (type.getParam() != null && st < type.getParam().length)
+                return new TypeWalk(type.getParam()[st++], this, tvars, pattern);
         } else if (st < fields.length) {
             YType t = (YType) fieldMap.get(fields[st]);
             TypeWalk res = new TypeWalk(t, this, tvars, pattern);
             res.field = fields[st++];
-            if (t.field == YetiType.FIELD_MUTABLE)
+            if (t.getField() == YetiType.FIELD_MUTABLE)
                 res.field = ";".concat(res.field);
             return res;
         }

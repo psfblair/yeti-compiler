@@ -84,7 +84,7 @@ final class TryCatch extends CapturingClosure {
     public void gen(Ctx ctx) {
         int argc = mergeCaptures(ctx, true);
         StringBuffer sigb = new StringBuffer("(");
-        for (Capture c = captures; c != null; c = c.next) {
+        for (Capture c = getCaptures(); c != null; c = c.getNext()) {
             sigb.append(c.captureType());
         }
         sigb.append(")Ljava/lang/Object;");
@@ -93,7 +93,7 @@ final class TryCatch extends CapturingClosure {
         ctx.getUsedMethodNames().put(name, null);
         ctx.methodInsn(INVOKESTATIC, ctx.getClassName(), name, sig);
         Ctx mc = ctx.newMethod(ACC_PRIVATE | ACC_STATIC, name, sig);
-        mc.localVarCount = argc;
+        mc.setLocalVarCount(argc);
 
         Label codeStart = new Label(), codeEnd = new Label();
         Label cleanupStart = cleanup == null ? null : new Label();

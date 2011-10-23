@@ -19,7 +19,7 @@ abstract class SelectMember extends BindRef implements CodeGen {
     public void gen(Ctx ctx) {
         st.gen(ctx);
         ctx.visitLine(line);
-        if (ctx.compilation.isGCJ)
+        if (ctx.getCompilation().isGCJ)
             ctx.typeInsn(CHECKCAST, "yeti/lang/Struct");
         ctx.ldcInsn(name);
         ctx.methodInsn(INVOKEINTERFACE, "yeti/lang/Struct",
@@ -29,7 +29,7 @@ abstract class SelectMember extends BindRef implements CodeGen {
     public void gen2(Ctx ctx, Code setValue, int _) {
         st.gen(ctx);
         ctx.visitLine(line);
-        if (ctx.compilation.isGCJ)
+        if (ctx.getCompilation().isGCJ)
             ctx.typeInsn(CHECKCAST, "yeti/lang/Struct");
         ctx.ldcInsn(name);
         setValue.gen(ctx);
@@ -39,7 +39,7 @@ abstract class SelectMember extends BindRef implements CodeGen {
         ctx.insn(ACONST_NULL);
     }
 
-    protected Code assign(final Code setValue) {
+    public Code assign(final Code setValue) {
         if (!assigned && !mayAssign()) {
             return null;
         }

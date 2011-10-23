@@ -43,7 +43,7 @@ final class VariantConstructor extends Code implements CodeGen {
                     gen2(ctx, null, 0);
             }
 
-            protected boolean flagop(int fl) {
+            public boolean flagop(int fl) {
                return (fl & STD_CONST) != 0 && key != null;
             }
 
@@ -53,7 +53,7 @@ final class VariantConstructor extends Code implements CodeGen {
         };
         Tag tag = new Tag();
         tag.setType(res);
-        tag.setPolymorph(arg.polymorph);
+        tag.setPolymorph(arg.isPolymorph());
         if (arg.flagop(CONST)) {
             Object[] key = {"TAG", name, arg.valueKey()};
             tag.key = Arrays.asList(key);

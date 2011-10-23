@@ -30,16 +30,16 @@ final class EvalBind implements Binder, CaptureWrapper, Opcodes, CodeGen {
                 genGet(ctx);
             }
 
-            protected Code assign(final Code value) {
+            public Code assign(final Code value) {
                 return bind.isMutable() ?
                         new SimpleCode(EvalBind.this, value, null, 0) : null;
             }
 
-            protected boolean flagop(int fl) {
+            public boolean flagop(int fl) {
                 return (fl & ASSIGN) != 0 && bind.isMutable();
             }
 
-            protected CaptureWrapper capture() {
+            public CaptureWrapper capture() {
                 return EvalBind.this;
             }
         };

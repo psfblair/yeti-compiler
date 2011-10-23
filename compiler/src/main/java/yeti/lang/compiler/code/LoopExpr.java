@@ -16,10 +16,10 @@ final class LoopExpr extends Code {
         Label start = new Label();
         Label end = new Label();
         ctx.visitLabel(start);
-        ++ctx.tainted;
+        ctx.incrementTainted();
         cond.genIf(ctx, end, false);
         body.gen(ctx);
-        --ctx.tainted;
+        ctx.decrementTainted();
         ctx.insn(POP);
         ctx.jumpInsn(GOTO, start);
         ctx.visitLabel(end);

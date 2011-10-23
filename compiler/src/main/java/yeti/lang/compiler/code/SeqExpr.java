@@ -4,7 +4,7 @@ import yeti.renamed.asm3.Label;
 
 public class SeqExpr extends Code {
     private Code st;
-    Code result;
+    private Code result;
 
     SeqExpr(Code statement) {
         st = statement;
@@ -20,13 +20,17 @@ public class SeqExpr extends Code {
         return st;
     }
 
-    void genIf(Ctx ctx, Label to, boolean ifTrue) {
+    public Code getResult() {
+        return result;
+    }
+
+    public void genIf(Ctx ctx, Label to, boolean ifTrue) {
         st.gen(ctx);
         ctx.insn(POP); // ignore the result of st expr
         result.genIf(ctx, to, ifTrue);
     }
 
-    protected void markTail() {
+    public void markTail() {
         result.markTail();
     }
 }

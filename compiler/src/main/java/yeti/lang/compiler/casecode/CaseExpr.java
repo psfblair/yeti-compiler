@@ -98,7 +98,7 @@ public final class CaseExpr extends Code {
     }
 
     @Override
-    protected void markTail() {
+    public void markTail() {
         for (int i = choices.size(); --i >= 0;) {
             ((Choice) choices.get(i)).expr.markTail();
         }

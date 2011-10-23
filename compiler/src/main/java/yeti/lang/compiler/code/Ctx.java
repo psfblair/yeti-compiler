@@ -26,6 +26,10 @@ public final class Ctx implements Opcodes {
         return localVarCount;
     }
 
+    public void setLocalVarCount(int localVarCount) {
+        this.localVarCount = localVarCount;
+    }
+
     public int incrementLocalVarCountBy(int increment) {
         localVarCount += increment;
         return localVarCount;
@@ -38,6 +42,10 @@ public final class Ctx implements Opcodes {
     public int incrementFieldCounterBy(int increment) {
         fieldCounter += increment;
         return fieldCounter;
+    }
+
+    public void setFieldCounter(int fieldCounter) {
+        this.fieldCounter = fieldCounter;
     }
 
     public String getClassName() {
@@ -62,6 +70,14 @@ public final class Ctx implements Opcodes {
 
     public int getTainted() {
         return tainted;
+    }
+
+    public void incrementTainted() {
+        ++tainted;
+    }
+
+    public void decrementTainted() {
+        --tainted;
     }
 
     public void captureCast(String type) {
@@ -205,7 +221,7 @@ public final class Ctx implements Opcodes {
         return ctx;
     }
 
-    void markInnerClass(Ctx outer, int access) {
+    public void markInnerClass(Ctx outer, int access) {
         String fn = className.substring(outer.className.length() + 1);
         outer.cw.visitInnerClass(className, outer.className, fn, access);
         cw.visitInnerClass(className, outer.className, fn, access);
@@ -217,7 +233,7 @@ public final class Ctx implements Opcodes {
         m.visitEnd();
     }
 
-    void createInit(int mod, String parent) {
+    public void createInit(int mod, String parent) {
         MethodVisitor m = cw.visitMethod(mod, "<init>", "()V", null, null);
         // super()
         m.visitVarInsn(ALOAD, 0);
@@ -229,7 +245,7 @@ public final class Ctx implements Opcodes {
 
     void genInt(Code arg, int line) {
         if (arg instanceof NumericConstant) {
-            intConst(((NumericConstant) arg).num.intValue());
+            intConst(((NumericConstant) arg).getNum().intValue());
         } else {
             arg.gen(this);
             visitLine(line);
@@ -272,7 +288,7 @@ public final class Ctx implements Opcodes {
         }
     }
     
-    void tryCatchBlock(Label start, Label end, Label handler, String type) {
+    public void tryCatchBlock(Label start, Label end, Label handler, String type) {
         insn(-1);
         m.visitTryCatchBlock(start, end, handler, type);
     }

@@ -36,16 +36,16 @@ import yeti.lang.compiler.code.*;
 public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen {
     private String id;
     private Capture next;
-    CaptureWrapper wrapper;
+    private CaptureWrapper wrapper;
     Object identity;
-    int localVar = -1; // -1 - use this (TryCatch captures use 0 localVar)
+    private int localVar = -1; // -1 - use this (TryCatch captures use 0 localVar)
     boolean uncaptured;
     boolean ignoreGet;
     private String refType;
 
     public void gen(Ctx ctx) {
         if (uncaptured) {
-            ref.gen(ctx);
+            getRef().gen(ctx);
             return;
         }
         genPreGet(ctx);
@@ -54,6 +54,10 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getId(Ctx ctx) {
@@ -68,6 +72,22 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
         return next;
     }
 
+    void setNext(Capture next) {
+        this.next = next;
+    }
+
+    void setWrapper(CaptureWrapper wrapper) {
+        this.wrapper = wrapper;
+    }
+
+    public int getLocalVar() {
+        return localVar;
+    }
+
+    public void setLocalVar(int localVar) {
+        this.localVar = localVar;
+    }
+
     public boolean flagop(int fl) {
         /*
          * DIRECT_BIND is allowed, because with code like
@@ -78,12 +98,12 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
          * a direct binding when it's captured, as this determined
          * later using prepareConst())
          */
-        return (fl & (PURE | ASSIGN | DIRECT_BIND)) != 0 && ref.flagop(fl);
+        return (fl & (PURE | ASSIGN | DIRECT_BIND)) != 0 && getRef().flagop(fl);
     }
 
     public void gen2(Ctx ctx, Code value, int _) {
         if (uncaptured) {
-            ref.assign(value).gen(ctx);
+            getRef().assign(value).gen(ctx);
         } else {
             genPreGet(ctx);
             wrapper.genSet(ctx, value);
@@ -91,8 +111,8 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
         }
     }
 
-    protected Code assign(final Code value) {
-        if (!ref.flagop(ASSIGN))
+    public Code assign(final Code value) {
+        if (!getRef().flagop(ASSIGN))
             return null;
         return new SimpleCode(this, value, null, 0);
     }
@@ -136,7 +156,7 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
 
     public CaptureWrapper capture() {
         if (uncaptured) {
-            return ref.capture();
+            return getRef().capture();
         }
         return wrapper == null ? null : this;
     }
@@ -154,7 +174,7 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
             } else if (getOrigin() != null) {
                 refType = ((BindExpr) getBinder()).captureType();
             } else {
-                refType = 'L' + javaType(ref.getType()) + ';';
+                refType = 'L' + javaType(getRef().getType()) + ';';
             }
         }
         return refType;
@@ -162,7 +182,7 @@ public final class Capture extends CaptureRef implements CaptureWrapper, CodeGen
 
     public void captureGen(Ctx ctx) {
         if (wrapper == null) {
-            ref.gen(ctx);
+            getRef().gen(ctx);
         } else {
             wrapper.genPreGet(ctx);
         }

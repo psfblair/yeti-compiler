@@ -47,7 +47,7 @@ public final class LoadModule extends Code {
                         return mutable;
                     }
 
-                    protected boolean flagop(int fl) {
+                    public boolean flagop(int fl) {
                         return (fl & DIRECT_BIND) != 0 ||
                                (fl & ASSIGN) != 0 && mutable;
                     }

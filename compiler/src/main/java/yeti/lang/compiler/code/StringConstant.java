@@ -2,7 +2,7 @@ package yeti.lang.compiler.code;
 
 import yeti.lang.compiler.yeti.type.YetiType;
 
-final class StringConstant extends Code {
+public final class StringConstant extends Code {
     String str;
 
     StringConstant(String str) {
@@ -14,7 +14,7 @@ final class StringConstant extends Code {
         ctx.ldcInsn(str);
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & STD_CONST) != 0;
     }
 

@@ -25,7 +25,7 @@ public abstract class Code implements Opcodes {
     static final int STD_CONST = CONST | PURE | DIRECT_BIND;
     
     // this which is not captured
-    static final int DIRECT_THIS = 0x40;
+    protected static final int DIRECT_THIS = 0x40;
 
     // capture that requires bounding function to initialize its module
     protected static final int MODULE_REQUIRED = 0x80;
@@ -46,7 +46,7 @@ public abstract class Code implements Opcodes {
 
     // Used to tell that this code is at tail position in a function.
     // Useful for doing tail call optimisations.
-    protected void markTail() {
+    public void markTail() {
     }
 
     public boolean flagop(int flag) {
@@ -97,12 +97,12 @@ public abstract class Code implements Opcodes {
 
     // When the code is a lvalue, then this method returns code that
     // performs the lvalue assigment of the value given as argument.
-    protected Code assign(Code value) {
+    public Code assign(Code value) {
         return null;
     }
 
     // Boolean codes have ability to generate jumps.
-    void genIf(Ctx ctx, Label to, boolean ifTrue) {
+    public void genIf(Ctx ctx, Label to, boolean ifTrue) {
         gen(ctx);
         ctx.fieldInsn(GETSTATIC, "java/lang/Boolean",
                 "TRUE", "Ljava/lang/Boolean;");

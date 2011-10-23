@@ -10,7 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-class TypeDescr extends YetiType {
+public class TypeDescr extends YetiType {
     private int type;
     private String name;
     private TypeDescr value;
@@ -52,7 +52,7 @@ class TypeDescr extends YetiType {
         return new Tag(YetiC.pair("alias", alias, "type", res), "Alias");
     }
 
-    static Tag yetiType(YType t, TypePattern defs) {
+    public static Tag yetiType(YType t, TypePattern defs) {
         return prepare(t, defs, new HashMap(), new HashMap()).force();
     }
 
@@ -70,10 +70,10 @@ class TypeDescr extends YetiType {
     private static void hdescr(TypeDescr descr, YType tt,
                                TypePattern defs, Map vars, Map refs) {
         Map m = new java.util.TreeMap();
-        if (tt.partialMembers != null)
-            m.putAll(tt.partialMembers);
-        if (tt.finalMembers != null) {
-            Iterator i = tt.finalMembers.entrySet().iterator();
+        if (tt.getPartialMembers() != null)
+            m.putAll(tt.getPartialMembers());
+        if (tt.getFinalMembers() != null) {
+            Iterator i = tt.getFinalMembers().entrySet().iterator();
             while (i.hasNext()) {
                 Map.Entry e = (Map.Entry) i.next();
                 YType t = (YType) e.getValue();
@@ -90,11 +90,11 @@ class TypeDescr extends YetiType {
             String doc = t.doc();
             it.put("name", name);
             it.put("description", doc == null ? Core.UNDEF_STR : doc);
-            it.put("mutable", Boolean.valueOf(t.field == FIELD_MUTABLE));
+            it.put("mutable", Boolean.valueOf(t.getField() == FIELD_MUTABLE));
             it.put("tag",
-                tt.finalMembers == null || !tt.finalMembers.containsKey(name)
+                tt.getFinalMembers() == null || !tt.getFinalMembers().containsKey(name)
                     ? "." :
-                tt.partialMembers != null && tt.partialMembers.containsKey(name)
+                tt.getPartialMembers() != null && tt.getPartialMembers().containsKey(name)
                     ? "`" : "");
             TypeDescr field = prepare(t, defs, vars, refs);
             field.properties = it;
@@ -130,8 +130,8 @@ class TypeDescr extends YetiType {
                                      Map vars, Map refs) {
         final int type = t.getType();
         if (type == VAR) {
-            if (t.ref != null)
-                return prepare(t.ref, defs, vars, refs);
+            if (t.getRef() != null)
+                return prepare(t.getRef(), defs, vars, refs);
             return new TypeDescr(getVarName(t, vars));
         }
         if (type < PRIMITIVES.length)
@@ -139,7 +139,7 @@ class TypeDescr extends YetiType {
         if (type == JAVA)
             return new TypeDescr(t.getJavaType().str());
         if (type == JAVA_ARRAY)
-            return new TypeDescr(prepare(t.param[0], defs, vars, refs)
+            return new TypeDescr(prepare(t.getParam()[0], defs, vars, refs)
                                     .name.concat("[]"));
         TypeDescr descr = (TypeDescr) refs.get(t), item;
         if (descr != null) {
@@ -187,7 +187,7 @@ class TypeDescr extends YetiType {
             case STRUCT:
             case VARIANT:
                 hdescr(descr, t, defs, vars, refs);
-                t = t.param[0].deref();
+                t = t.getParam()[0].deref();
                 if ((t.flags & FL_ERROR_IS_HERE) != 0)
                     descr.alias = getVarName(t, vars);
                 break;

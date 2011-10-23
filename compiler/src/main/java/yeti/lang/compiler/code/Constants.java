@@ -11,10 +11,22 @@ import java.util.Map;
 public final class Constants implements Opcodes {
     final Map constants = new HashMap();
     private Ctx sb;
-    Map structClasses = new HashMap();
+    private Map structClasses = new HashMap();
     int anonymousClassCounter;
     String sourceName;
-    Ctx ctx;
+    private Ctx ctx;
+
+    public Ctx getCtx() {
+        return ctx;
+    }
+
+    void setCtx(Ctx ctx) {
+        this.ctx = ctx;
+    }
+
+    public Map getStructClasses() {
+        return structClasses;
+    }
 
     public void constField(int mode, String name, Code code, String descr) {
         ctx.getClassWriter().visitField(mode, name, descr, null, null).visitEnd();

@@ -28,7 +28,7 @@ final class ConditionalExpr extends Code {
         ctx.insn(-1); // reset type
     }
 
-    void genIf(Ctx ctx, Label to, boolean ifTrue) {
+    public void genIf(Ctx ctx, Label to, boolean ifTrue) {
         Label end = new Label();
         for (int i = 0, last = choices.length - 1; i <= last; ++i) {
             Label jmpNext = i < last ? new Label() : end;
@@ -43,7 +43,7 @@ final class ConditionalExpr extends Code {
         }
     }
 
-    protected void markTail() {
+    public void markTail() {
         for (int i = choices.length; --i >= 0;) {
             choices[i][0].markTail();
         }

@@ -42,10 +42,27 @@ import yeti.lang.compiler.yeti.type.YType;
  * This class is mostly useful as a place where tail call optimization happens.
  */
 abstract class CaptureRef extends BindRef {
-    Function capturer;
-    BindRef ref;
-    Binder[] args;
-    Capture[] argCaptures;
+    private Function capturer;
+    private BindRef ref;
+    private Binder[] args;
+    private Capture[] argCaptures;
+
+    void setRef(BindRef ref) {
+        this.ref = ref;
+    }
+
+    public BindRef getRef() {
+        return ref;
+    }
+
+    Function getCapturer() {
+        return capturer;
+    }
+
+    void setCapturer(Function capturer) {
+        this.capturer = capturer;
+    }
+
 
     final class SelfApply extends Apply {
         boolean tail;
@@ -92,7 +109,7 @@ abstract class CaptureRef extends BindRef {
             ctx.jumpInsn(GOTO, capturer.restart);
         }
 
-        protected void markTail() {
+        public void markTail() {
             tail = true;
         }
 
@@ -112,7 +129,7 @@ abstract class CaptureRef extends BindRef {
                  * so current scope is also the scope of applied function.
                  */
                 argCaptures = new Capture[args.length];
-                for (Capture c = capturer.captures; c != null; c = c.next)
+                for (Capture c = capturer.getCaptures(); c != null; c = c.getNext())
                     for (int i = args.length; --i >= 0;)
                         if (c.getBinder() == args[i]) {
                             argCaptures[i] = c;

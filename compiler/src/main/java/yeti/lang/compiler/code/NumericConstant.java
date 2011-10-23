@@ -7,19 +7,23 @@ import yeti.lang.RatNum;
 import yeti.lang.compiler.yeti.type.YetiType;
 
 public final class NumericConstant extends Code implements CodeGen {
-    Num num;
+    private Num num;
 
     NumericConstant(Num num) {
         setType(YetiType.NUM_TYPE);
         this.num = num;
     }
 
-    protected boolean flagop(int fl) {
+    public Num getNum() {
+        return num;
+    }
+
+    public boolean flagop(int fl) {
         return ((fl & INT_NUM) != 0 && num instanceof IntNum) ||
                (fl & STD_CONST) != 0;
     }
 
-    boolean genInt(Ctx ctx, boolean small) {
+    public boolean genInt(Ctx ctx, boolean small) {
         if (!(num instanceof IntNum)) {
             return false;
         }
@@ -57,7 +61,7 @@ public final class NumericConstant extends Code implements CodeGen {
     }
 
     public void gen(Ctx ctx) {
-        if (ctx.constants.constants.containsKey(num)) {
+        if (ctx.getConstants().constants.containsKey(num)) {
             ctx.constant(num, this);
             return;
         }

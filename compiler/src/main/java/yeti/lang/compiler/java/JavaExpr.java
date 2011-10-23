@@ -33,10 +33,7 @@ package yeti.lang.compiler.java;
 
 import yeti.lang.compiler.closure.Capture;
 import yeti.lang.compiler.closure.CaptureWrapper;
-import yeti.lang.compiler.code.BindRef;
-import yeti.lang.compiler.code.Code;
-import yeti.lang.compiler.code.Ctx;
-import yeti.lang.compiler.code.NumericConstant;
+import yeti.lang.compiler.code.*;
 import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.Label;
@@ -89,10 +86,10 @@ public class JavaExpr extends Code {
             ctx.methodInsn(INVOKEVIRTUAL, "yeti/lang/AIter",
                                 "first", "()Ljava/lang/Object;");
             YType t = null;
-            if (argType.param.length != 0 &&
-                ((t = argType.param[0]).getType() != YetiType.JAVA ||
+            if (argType.getParam().length != 0 &&
+                ((t = argType.getParam()[0]).getType() != YetiType.JAVA ||
                  t.getJavaType().getDescription().length() > 1)) {
-                convert(ctx, given.param[0], argType.param[0]);
+                convert(ctx, given.getParam()[0], argType.getParam()[0]);
             }
             // aiav
             ctx.methodInsn(INVOKEVIRTUAL, tmpClass,
@@ -109,7 +106,7 @@ public class JavaExpr extends Code {
 
             String s = "";
             YType argArrayType = argType;
-            while ((argType = argType.param[0]).getType() ==
+            while ((argType = argType.getParam()[0]).getType() ==
                         YetiType.JAVA_ARRAY) {
                 s += "[";
                 argArrayType = argType;
@@ -325,7 +322,7 @@ public class JavaExpr extends Code {
             return false;
         // conversion from array to list
         if (argType.getType() == YetiType.MAP && given.getType() == YetiType.JAVA_ARRAY) {
-            String javaItem = given.param[0].getJavaType().getDescription();
+            String javaItem = given.getParam()[0].getJavaType().getDescription();
             if (javaItem.length() == 1) {
                 String arrayType = "[".concat(javaItem);
                 ctx.typeInsn(CHECKCAST, arrayType);
@@ -337,7 +334,7 @@ public class JavaExpr extends Code {
             ctx.typeInsn(CHECKCAST, "[Ljava/lang/Object;");
             ctx.insn(DUP);
             ctx.jumpInsn(IFNULL, isNull);
-            if (argType.param[1].deref().getType() == YetiType.NONE) {
+            if (argType.getParam()[1].deref().getType() == YetiType.NONE) {
                 ctx.insn(DUP);
                 ctx.insn(ARRAYLENGTH);
                 ctx.jumpInsn(IFEQ, isNull);
@@ -349,7 +346,7 @@ public class JavaExpr extends Code {
             ctx.jumpInsn(GOTO, end);
             ctx.visitLabel(isNull);
             ctx.insn(POP);
-            if (argType.param[1].deref().getType() == YetiType.NONE) {
+            if (argType.getParam()[1].deref().getType() == YetiType.NONE) {
                 ctx.insn(ACONST_NULL);
             } else {
                 ctx.typeInsn(NEW, "yeti/lang/MList");
@@ -430,7 +427,7 @@ public class JavaExpr extends Code {
         }
     }
 
-    void gen(Ctx ctx) {
+    public void gen(Ctx ctx) {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,6 +1,9 @@
 package yeti.lang.compiler.yeti.type;
 
 import yeti.lang.compiler.java.JavaType;
+import yeti.lang.compiler.typeprettyprinter.ShowTypeFun;
+import yeti.lang.compiler.typeprettyprinter.TypeDescr;
+import yeti.lang.compiler.typeprettyprinter.TypePattern;
 
 import java.util.Map;
 
@@ -10,9 +13,8 @@ public class YType {
     private JavaType javaType;
     private int field;
     private Map finalMembers;
-
-    Map partialMembers;
-    YType ref;
+    private Map partialMembers;
+    private YType ref;
     int depth;
     int flags;
 
@@ -37,12 +39,24 @@ public class YType {
         return type;
     }
 
+    public void setType(int type) {
+        this.type = type;
+    }
+
     public YType[] getParam() {
         return param;
     }
 
+    public void setParam(YType[] param) {
+        this.param = param;
+    }
+
     public JavaType getJavaType() {
         return javaType;
+    }
+
+    public void setJavaType(JavaType javaType) {
+        this.javaType = javaType;
     }
 
     public int getField() {
@@ -51,6 +65,14 @@ public class YType {
 
     public Map getFinalMembers() {
         return finalMembers;
+    }
+
+    public Map getPartialMembers() {
+        return partialMembers;
+    }
+
+    public YType getRef() {
+        return ref;
     }
 
     YType(int depth) {

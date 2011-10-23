@@ -22,7 +22,7 @@ public class StaticRef extends BindRef {
                              'L' + javaType(getType()) + ';');
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & DIRECT_BIND) != 0;
     }
 }

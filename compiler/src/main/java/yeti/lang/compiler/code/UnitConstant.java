@@ -14,7 +14,7 @@ public final class UnitConstant extends BindRef {
         ctx.insn(ACONST_NULL);
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & STD_CONST) != 0;
     }
 

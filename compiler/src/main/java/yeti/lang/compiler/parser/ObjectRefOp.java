@@ -33,8 +33,16 @@ package yeti.lang.compiler.parser;
 
 
 public final class ObjectRefOp extends BinOp {
-    String name;
-    Node[] arguments;
+    private String name;
+    private Node[] arguments;
+
+    public String getName() {
+        return name;
+    }
+
+    public Node[] getArguments() {
+        return arguments;
+    }
 
     ObjectRefOp(String name, Node[] arguments) {
         super("#", 0, true);

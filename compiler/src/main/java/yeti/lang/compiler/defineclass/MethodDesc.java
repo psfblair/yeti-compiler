@@ -31,10 +31,22 @@
 package yeti.lang.compiler.defineclass;
 
 import yeti.lang.compiler.CompileException;
+import yeti.lang.compiler.closure.Closure;
+import yeti.lang.compiler.closure.Function;
+import yeti.lang.compiler.code.BindRef;
 import yeti.lang.compiler.code.Binder;
+import yeti.lang.compiler.code.Code;
+import yeti.lang.compiler.code.CompileCtx;
 import yeti.lang.compiler.java.JavaClass;
+import yeti.lang.compiler.java.JavaClassNotFoundException;
+import yeti.lang.compiler.java.JavaType;
+import yeti.lang.compiler.parser.Bind;
 import yeti.lang.compiler.parser.Node;
+import yeti.lang.compiler.parser.XNode;
+import yeti.lang.compiler.yeti.YetiAnalyzer;
 import yeti.lang.compiler.yeti.type.Scope;
+import yeti.lang.compiler.yeti.type.TypeException;
+import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
 import yeti.renamed.asm3.Opcodes;
 
@@ -50,7 +62,7 @@ final class MethodDesc extends YetiType {
 
     MethodDesc(JavaClass.Meth method, Node argList, Scope scope) {
         this.method = method;
-        Node[] args = ((XNode) argList).expr;
+        Node[] args = ((XNode) argList).getExpr();
         arguments = new Binder[args.length / 2];
         names = new String[arguments.length];
         for (int i = 0, j = 0; i < arguments.length; ++i, j += 2) {
@@ -79,10 +91,10 @@ final class MethodDesc extends YetiType {
     }
 
     private void check(YType t, Node node, String packageName) {
-        while (t.type == YetiType.JAVA_ARRAY)
-            t = t.param[0];
-        if (t.type == YetiType.JAVA && t.javaType.description.charAt(0) == 'L')
-            t.javaType.resolve(node).checkPackage(node, packageName);
+        while (t.getType() == YetiType.JAVA_ARRAY)
+            t = t.getParam()[0];
+        if (t.getType() == YetiType.JAVA && t.getJavaType().getDescription().charAt(0) == 'L')
+            t.getJavaType().resolve(node).checkPackage(node, packageName);
     }
 
     void check(Node argList, String packageName) {
@@ -185,7 +197,7 @@ final class MethodDesc extends YetiType {
         scope.closure = c; // to proxy super-class closures
 
         ClassBinding parentClass = null;
-        Node[] extend = ((XNode) cl.expr[2]).expr;
+        Node[] extend = ((XNode) cl.getExpr()[2]).expr;
         Node[] superArgs = null;
         Node superNode = cl;
 
@@ -194,9 +206,9 @@ final class MethodDesc extends YetiType {
         for (int i = 0; i < extend.length; i += 2) {
             ClassBinding cb =
                 resolveFullClass(extend[i].sym(), scope, true, extend[i]);
-            JavaType jt = cb.type.javaType.resolve(extend[i]);
+            JavaType jt = cb.getType().getJavaType().resolve(extend[i]);
             jt.checkPackage(extend[i], packageName);
-            Node[] args = ((XNode) extend[i + 1]).expr;
+            Node[] args = ((XNode) extend[i + 1]).getExpr();
             if (jt.isInterface()) {
                 if (args != null)
                     throw new CompileException(extend[i + 1],
@@ -205,7 +217,7 @@ final class MethodDesc extends YetiType {
             } else if (parentClass != null) {
                 throw new CompileException(extend[i],
                     "Cannot extend multiple non-interface classes (" +
-                        parentClass.type.javaType.dottedName() +
+                        parentClass.getType().getJavaType().dottedName() +
                         " and " + jt.dottedName() + ')');
             } else {
                 parentClass = cb;
@@ -215,34 +227,34 @@ final class MethodDesc extends YetiType {
         }
         if (parentClass == null)
             parentClass = new ClassBinding(OBJECT_TYPE);
-        parentClass.type.javaType.resolve(cl);
+        parentClass.getType().getJavaType().resolve(cl);
         c.init(parentClass,
                (String[]) interfaces.toArray(new String[interfaces.size()]));
-        scope = new Scope(scope_[0], cl.expr[0].sym(), null);
+        scope = new Scope(scope_[0], cl.getExpr()[0].sym(), null);
         LocalClassBinding binding = new LocalClassBinding(c.classType);
         scope.importClass = binding;
         scope_[0] = scope;
-        MethodDesc consDesc = new MethodDesc(c.constr, cl.expr[1], scope);
+        MethodDesc consDesc = new MethodDesc(c.constr, cl.getExpr()[1], scope);
 
         // method defs
         List methods = new ArrayList();
-        for (int i = 3; i < cl.expr.length; ++i) {
-            String kind = cl.expr[i].kind;
+        for (int i = 3; i < cl.getExpr().length; ++i) {
+            String kind = cl.getExpr()[i].kind;
             if (kind != "method" && kind != "static-method"
                                  && kind != "abstract-method")
                 continue;
-            Node[] m = ((XNode) cl.expr[i]).expr;
+            Node[] m = ((XNode) cl.getExpr()[i]).getExpr();
             YType returnType = m[0].sym() == "void" ? UNIT_TYPE :
                                 JavaType.typeOfName(m[0].sym(), scope);
             JavaClass.Meth meth =
                 c.addMethod(m[1].sym(), returnType, kind,
-                            m.length > 3 ? m[3].line : 0);
+                            m.length > 3 ? m[3].getLine() : 0);
             MethodDesc md = new MethodDesc(meth, m[2], scope);
             if (kind == "abstract-method")
                 continue;
             md.m = m;
             if ((md.isStatic = kind != "method") && !topLevel) {
-                throw new CompileException(cl.expr[i], "Static methods are " +
+                throw new CompileException(cl.getExpr()[i], "Static methods are " +
                     "allowed only in classes defined in the module top-level");
             }            
             methods.add(md);
@@ -253,7 +265,7 @@ final class MethodDesc extends YetiType {
         } catch (JavaClassNotFoundException ex) {
             throw new CompileException(cl, ex);
         }
-        consDesc.check(cl.expr[1], scope.ctx.packageName);
+        consDesc.check(cl.getExpr()[1], scope.ctx.packageName);
         for (int i = 0, cnt = methods.size(); i < cnt; ++i) {
             MethodDesc md = (MethodDesc) methods.get(i);
             md.check(md.m[2], scope.ctx.packageName);
@@ -271,17 +283,17 @@ final class MethodDesc extends YetiType {
             superArgs = new Node[0];
         Code[] initArgs = YetiAnalyzer.mapArgs(0, superArgs, consScope, depth);
         JavaType.Method superCons =
-            JavaType.resolveConstructor(superNode, parentClass.type,
+            JavaType.resolveConstructor(superNode, parentClass.getType(),
                                         initArgs, false)
                     .check(superNode, packageName, Opcodes.ACC_PROTECTED);
-        c.superInit(superCons, initArgs, superNode.line);
+        c.superInit(superCons, initArgs, superNode.getLine());
 
         local = new Scope(local, "super", c.superRef);
 
         // field defs
-        for (int i = 3; i < cl.expr.length; ++i) {
-            if (cl.expr[i] instanceof Bind) {
-                Bind bind = (Bind) cl.expr[i];
+        for (int i = 3; i < cl.getExpr().length; ++i) {
+            if (cl.getExpr()[i] instanceof Bind) {
+                Bind bind = (Bind) cl.getExpr()[i];
                 if (bind.property) {
                     throw new CompileException(bind,
                         "Class field cannot be a property");
@@ -305,8 +317,8 @@ final class MethodDesc extends YetiType {
                         YetiAnalyzer.isOp(bind, bind.type, code, scope, depth);
                 }
                 if (bind.name != "_") {
-                    local = bind(bind.name, code.type, binder,
-                                 bind.var ? RESTRICT_ALL : code.polymorph
+                    local = bind(bind.name, code.getType(), binder,
+                                 bind.var ? RESTRICT_ALL : code.isPolymorph()
                                     ? RESTRICT_POLY : 0, depth, local);
                 }
             }

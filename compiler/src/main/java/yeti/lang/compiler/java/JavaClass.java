@@ -83,7 +83,7 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             }
         }
 
-        protected boolean flagop(int flag) {
+        public boolean flagop(int flag) {
             return (flag & DIRECT_THIS) != 0 && argn == 0;
         }
     }
@@ -129,16 +129,16 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             if (descr != null)
                 return descr;
             StringBuffer additionalArgs = new StringBuffer();
-            for (Capture c = captures; c != null; c = c.next)
+            for (Capture c = captures; c != null; c = c.getNext())
                 additionalArgs.append(c.captureType());
             return super.descr(additionalArgs.toString());
         }
 
         void convertArgs(Ctx ctx) {
             int n = (access & ACC_STATIC) == 0 ? 1 : 0;
-            ctx.localVarCount = args.size() + n;
+            ctx.setLocalVarCount(args.size() + n);
             for (int i = 0; i < arguments.length; ++i) {
-                if (arguments[i].type != YetiType.JAVA)
+                if (arguments[i].getType() != YetiType.JAVA)
                     continue;
                 String descr = arguments[i].getJavaType().getDescription();
                 if (descr != "Ljava/lang/String;" && descr.charAt(0) == 'L')
@@ -223,23 +223,23 @@ public final class JavaClass extends CapturingClosure implements Runnable {
                 descr = 'L' + javaType + ';';
             }
             BindRef ref = new BindRef() {
-                void gen(Ctx ctx) {
+                public void gen(Ctx ctx) {
                     genPreGet(ctx);
                     genGet(ctx);
                 }
 
-                Code assign(final Code value) {
+                public Code assign(final Code value) {
                     return var ?
                             new SimpleCode(Field.this, value, null, 0) : null;
                 }
 
-                boolean flagop(int fl) {
+                public boolean flagop(int fl) {
                     return (fl & ASSIGN) != 0 && var ||
                            (fl & (CONST | DIRECT_BIND)) != 0 && directConst ||
                            (fl & PURE) != 0 && !var;
                 }
 
-                CaptureWrapper capture() {
+                public CaptureWrapper capture() {
                     if (!var)
                         return null;
                     access = ACC_SYNTHETIC; // clear private
@@ -251,11 +251,11 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             return ref;
         }
 
-        void gen(Ctx ctx) {
+        public void gen(Ctx ctx) {
             if (this == serialVersion) {
                 // hack to allow defining serialVersionUID
-                Long v = new Long((((NumericConstant) value).num).longValue());
-                ctx.cw.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL,
+                Long v = new Long((((NumericConstant) value).getNum()).longValue());
+                ctx.getClassWriter().visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL,
                         name, "J", null, v);
                 directConst = true;
             } else if (javaType == null) {
@@ -265,19 +265,19 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             } else if (!var && value.prepareConst(ctx)) {
                 directConst = true;
             } else {
-                ctx.cw.visitField(var ? access : access | ACC_FINAL,
-                                  name, descr, null, null).visitEnd();
+                ctx.getClassWriter().visitField(var ? access : access | ACC_FINAL,
+                        name, descr, null, null).visitEnd();
                 genPreGet(ctx);
                 genSet(ctx, value);
             }
         }
     }
 
-    JavaClass(String className, boolean isPublic) {
+    public JavaClass(String className, boolean isPublic) {
         setType(YetiType.UNIT_TYPE);
         this.className = className;
         classType = new YType(YetiType.JAVA, YetiType.NO_PARAM);
-        classType.javaType = JavaType.createNewClass(className, this);
+        classType.setJavaType(JavaType.createNewClass(className, this));
         self = new Arg(classType, false);
         constr.name = "<init>";
         constr.returnType = YetiType.UNIT_TYPE;
@@ -302,7 +302,7 @@ public final class JavaClass extends CapturingClosure implements Runnable {
 
     static void genRet(Ctx ctx, YType returnType) {
         int ins = ARETURN;
-        if (returnType.type == YetiType.JAVA) {
+        if (returnType.getType() == YetiType.JAVA) {
             switch (returnType.getJavaType().getDescription().charAt(0)) {
                 case 'D': ins = DRETURN; break;
                 case 'F': ins = FRETURN; break;
@@ -319,9 +319,9 @@ public final class JavaClass extends CapturingClosure implements Runnable {
         implement = interfaces;
         this.parentClass = parentClass;
         YType t = new YType(YetiType.JAVA, YetiType.NO_PARAM);
-        t.javaType = parentClass.type.javaType.dup();
-        t.javaType.implementation = this;
-        t.javaType.publicMask = ACC_PUBLIC | ACC_PROTECTED;
+        t.setJavaType(parentClass.getType().getJavaType().dup());
+        t.getJavaType().implementation = this;
+        t.getJavaType().setPublicMask(ACC_PUBLIC | ACC_PROTECTED);
         superRef = new Arg(t, true);
     }
 
@@ -339,7 +339,7 @@ public final class JavaClass extends CapturingClosure implements Runnable {
         return m;
     }
 
-    Binder addField(Code value, boolean var, String name) {
+    public Binder addField(Code value, boolean var, String name) {
         Field field;
         if (name == "serialVersionUID" && !var &&
                 serialVersion == null && value instanceof NumericConstant) {
@@ -373,12 +373,12 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             m.init();
             ((m.access & ACC_STATIC) != 0 ? t.staticMethods : t.methods).add(m);
         }
-        t.parent = parentClass.type.javaType;
-        t.className = className;
-        t.interfaces = implement;
-        t.access = isPublic ? ACC_PUBLIC : 0;
-        classType.javaType.publicMask = ACC_PUBLIC | ACC_PROTECTED;
-        classType.javaType.resolve(t);
+        t.parent = parentClass.getType().getJavaType();
+        t.setClassName(className);
+        t.setInterfaces(implement);
+        t.setAccess(isPublic ? ACC_PUBLIC : 0);
+        classType.getJavaType().setPublicMask(ACC_PUBLIC | ACC_PROTECTED);
+        classType.getJavaType().resolve(t);
     }
 
     // must be called after close
@@ -386,17 +386,17 @@ public final class JavaClass extends CapturingClosure implements Runnable {
         captureCount = mergeCaptures(null, true);
         BindRef[] r = new BindRef[captureCount];
         int n = 0;
-        for (Capture c = captures; c != null; c = c.next) {
-            r[n++] = c.ref;
+        for (Capture c = super.getCaptures(); c != null; c = c.getNext()) {
+            r[n++] = c.getRef();
         }
         return r;
     }
 
     // called by mergeCaptures
     void captureInit(Ctx fun, Capture c, int n) {
-        c.id = "_" + n;
+        c.setId("_" + n);
         // for super arguments
-        c.localVar = n + constr.args.size() + 1;
+        c.setLocalVar(n + constr.args.size() + 1);
     }
 
     String getAccessor(JavaType.Method method, String descr,
@@ -428,19 +428,19 @@ public final class JavaClass extends CapturingClosure implements Runnable {
         return (String) accessor[0];
     }
 
-    void gen(Ctx ctx) {
+    public void gen(Ctx ctx) {
         int i, cnt;
-        constr.captures = captures;
+        constr.captures = super.getCaptures();
         ctx.insn(ACONST_NULL);
-        Ctx clc = ctx.newClass(classType.javaType.access | ACC_SUPER,
-                        className, parentClass.type.javaType.className(),
+        Ctx clc = ctx.newClass(classType.getJavaType().getAccess() | ACC_SUPER,
+                        className, parentClass.getType().getJavaType().className(),
                         implement);
-        clc.fieldCounter = captureCount;
+        clc.setFieldCounter(captureCount);
         // block using our method names ;)
         for (i = 0, cnt = methods.size(); i < cnt; ++i)
-            clc.usedMethodNames.put(((Meth) methods.get(i)).name, null);
+            clc.getUsedMethodNames().put(((Meth) methods.get(i)).name, null);
         if (!isPublic)
-            clc.markInnerClass(ctx.constants.ctx, ACC_STATIC);
+            clc.markInnerClass(ctx.getConstants().getCtx(), ACC_STATIC);
         Ctx init = clc.newMethod(constr.access, "<init>", constr.descr(null));
         constr.convertArgs(init);
         genClosureInit(init);
@@ -448,11 +448,10 @@ public final class JavaClass extends CapturingClosure implements Runnable {
                           INVOKESPECIAL);
         // extra arguments are used for smuggling in captured bindings
         int n = constr.arguments.length;
-        for (Capture c = captures; c != null; c = c.next) {
-            c.localVar = -1; // reset to using this
-            clc.cw.visitField(0, c.id, c.captureType(), null, null).visitEnd();
-            init.load(0).load(++n)
-                .fieldInsn(PUTFIELD, className, c.id, c.captureType());
+        for (Capture c = super.getCaptures(); c != null; c = c.getNext()) {
+            c.setLocalVar(-1); // reset to using this
+            clc.getClassWriter().visitField(0, c.getId(), c.captureType(), null, null).visitEnd();
+            init.load(0).load(++n).fieldInsn(PUTFIELD, className, c.getId(), c.captureType());
         }
         for (i = 0, cnt = fields.size(); i < cnt; ++i)
             ((Code) fields.get(i)).gen(init);
@@ -462,14 +461,14 @@ public final class JavaClass extends CapturingClosure implements Runnable {
             ((Meth) methods.get(i)).gen(clc);
         if (isPublic) {
             Ctx clinit = clc.newMethod(ACC_STATIC, "<clinit>", "()V");
-            clinit.methodInsn(INVOKESTATIC, ctx.className,
+            clinit.methodInsn(INVOKESTATIC, ctx.getClassName(),
                               "eval", "()Ljava/lang/Object;");
             clinit.insn(POP);
             clinit.insn(RETURN);
             clinit.closeMethod();
         }
         classCtx = clc;
-        ctx.compilation.postGen.add(this);
+        ctx.getCompilation().getPostGen().add(this);
     }
 
     // postGen hook. accessors can be added later than the class gen is called
@@ -498,7 +497,7 @@ public final class JavaClass extends CapturingClosure implements Runnable {
                 for (int j = 0; j < m.arguments.length; ++j)
                     loadArg(mc, m.arguments[j], j + start);
                 mc.methodInsn(insn, accessor[3] == null ? className :
-                                    parentClass.type.javaType.className(),
+                                    parentClass.getType().getJavaType().className(),
                               m.name, m.descr(null));
                 genRet(mc, m.returnType);
             } else { // field

@@ -183,7 +183,7 @@ public final class StructConstructor extends CapturingClosure implements Compara
                 while (v instanceof BindRef)
                     v = ((BindRef) v).unref(true);
                 if (v instanceof Function)
-                    ((Function) v).publish = true;
+                    ((Function) v).setPublish(true);
             }
         }
     }
@@ -342,18 +342,18 @@ public final class StructConstructor extends CapturingClosure implements Compara
                    .append(fields[i].getName());
             }
             structKey = buf.toString();
-            cn = (String) ctx.getConstants().structClasses.get(structKey);
+            cn = (String) ctx.getConstants().getStructClasses().get(structKey);
             if (cn != null)
                 return cn;
         }
 
         cn = ctx.getCompilation().createClassName(ctx, ctx.getClassName(), "");
         if (structKey != null) {
-            ctx.getConstants().structClasses.put(structKey, cn);
+            ctx.getConstants().getStructClasses().put(structKey, cn);
         }
         Ctx st = ctx.newClass(ACC_SUPER | ACC_FINAL, cn,
                               "yeti/lang/AStruct", null);
-        st.fieldCounter = fieldCount;
+        st.setFieldCounter(fieldCount);
         mergeCaptures(st, true);
         Ctx m = st.newMethod(ACC_PUBLIC, "<init>",
                     withParent == null ? "()V" : "(Lyeti/lang/Struct;)V");
@@ -481,7 +481,7 @@ public final class StructConstructor extends CapturingClosure implements Compara
 
         // get(int)
         m = st.newMethod(ACC_PUBLIC, "get", "(I)Ljava/lang/Object;");
-        m.localVarCount = 2;
+        m.setLocalVarCount(2);
         m.load(0).varInsn(ILOAD, 1);
         jumps = new Label[fieldCount];
         int mutableCount = 0;
@@ -585,7 +585,7 @@ public final class StructConstructor extends CapturingClosure implements Compara
         // set(String, Object)
         m = st.newMethod(ACC_PUBLIC, "set",
                          "(Ljava/lang/String;Ljava/lang/Object;)V");
-        m.localVarCount = 3;
+        m.setLocalVarCount(3);
         m.load(0);
         for (i = 0; i < fieldCount; ++i) {
             field = fields[i];

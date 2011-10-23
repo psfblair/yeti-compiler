@@ -5,11 +5,11 @@ import yeti.lang.compiler.yeti.type.YType;
 import yeti.lang.compiler.yeti.type.YetiType;
 
 //SHOULD THIS BE SPLIT WITH PART BEING A JAVAEXPR?
-final class NewArrayExpr extends Code {
+public final class NewArrayExpr extends Code {
     private Code count;
     private int line;
 
-    NewArrayExpr(YType type, Code count, int line) {
+    public NewArrayExpr(YType type, Code count, int line) {
         setType(type);
         this.count = count;
         this.line = line;

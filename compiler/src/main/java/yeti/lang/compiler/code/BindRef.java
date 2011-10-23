@@ -48,7 +48,7 @@ public abstract class BindRef extends Code {
     }
 
     // Some bindings can be forced into direct mode
-    void forceDirect() {
+    public void forceDirect() {
         throw new UnsupportedOperationException();
     }
 }

@@ -28,7 +28,7 @@ final class MapConstructor extends Code {
         }
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & EMPTY_LIST) != 0 && keyItems.length == 0;
     }
 }

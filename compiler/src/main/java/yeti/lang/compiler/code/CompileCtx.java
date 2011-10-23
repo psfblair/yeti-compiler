@@ -36,7 +36,7 @@ public final class CompileCtx implements Opcodes {
     private String currentSrc;
     private Map definedClasses = new HashMap();
     private List unstoredClasses;
-    List postGen = new ArrayList();
+    private List postGen = new ArrayList();
     boolean isGCJ;
     private ClassFinder classPath;
 
@@ -53,6 +53,10 @@ public final class CompileCtx implements Opcodes {
         return classPath;
     }
 
+    public List getPostGen() {
+        return postGen;
+    }
+
     CompileCtx(SourceReader reader, CodeWriter writer) {
         this.reader = reader;
         this.writer = writer;
@@ -66,12 +70,12 @@ public final class CompileCtx implements Opcodes {
         warnings.add(ex);
     }
 
-    String createClassName(Ctx ctx, String outerClass, String nameBase) {
+    public String createClassName(Ctx ctx, String outerClass, String nameBase) {
         boolean anon = nameBase == "" && ctx != null;
         String name = nameBase = outerClass + '$' + nameBase;
         if (anon) {
             do {
-                name = nameBase + ctx.constants.anonymousClassCounter++;
+                name = nameBase + ctx.getConstants().anonymousClassCounter++;
             } while (definedClasses.containsKey(name));
         } else {
             for (int i = 0; definedClasses.containsKey(name); ++i)
@@ -87,7 +91,7 @@ public final class CompileCtx implements Opcodes {
     }
 
     private void generateModuleFields(Map fields, Ctx ctx, Map ignore) {
-        if (ctx.compilation.isGCJ)
+        if (ctx.getCompilation().isGCJ)
             ctx.typeInsn(CHECKCAST, "yeti/lang/Struct");
         for (Iterator i = fields.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry) i.next();
@@ -245,7 +249,7 @@ public final class CompileCtx implements Opcodes {
                     | ACC_SUPER | (module && codeTree.getModuleType().isDeprecated()
                         ? ACC_DEPRECATED : 0), name,
                    (flags & YetiC.CF_EVAL) != 0 ? "yeti/lang/Fun" : null, null);
-            constants.ctx = ctx;
+            constants.setCtx(ctx);
             if (module) {
                 ctx.getClassWriter().visitField(ACC_PRIVATE | ACC_STATIC, "$",
                                   "Ljava/lang/Object;", null, null).visitEnd();
@@ -262,7 +266,7 @@ public final class CompileCtx implements Opcodes {
                 ctx.visitLabel(eval);
                 Code codeTail = codeTree.getCode();
                 while (codeTail instanceof SeqExpr)
-                    codeTail = ((SeqExpr) codeTail).result;
+                    codeTail = ((SeqExpr) codeTail).getResult();
                 if (codeTail instanceof StructConstructor) {
                     ((StructConstructor) codeTail).publish();
                     codeTree.gen(ctx);
@@ -325,7 +329,7 @@ public final class CompileCtx implements Opcodes {
         }
     }
 
-    void addClass(String name, Ctx ctx) {
+    public void addClass(String name, Ctx ctx) {
         if (definedClasses.put(name, ctx) != null) {
             throw new IllegalStateException("Duplicate class: "
                                             + name.replace('/', '.'));

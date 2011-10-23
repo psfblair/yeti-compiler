@@ -2,12 +2,12 @@ package yeti.lang.compiler.typeprettyprinter;
 
 import yeti.lang.*;
 
-class ShowTypeFun extends Fun2 {
+public class ShowTypeFun extends Fun2 {
     Fun showType;
     Fun formatDoc;
     String indentStep = "   ";
 
-    ShowTypeFun() {
+    public ShowTypeFun() {
         showType = this;
     }
 

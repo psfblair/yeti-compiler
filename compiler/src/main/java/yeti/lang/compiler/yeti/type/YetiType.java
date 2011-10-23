@@ -34,6 +34,7 @@ package yeti.lang.compiler.yeti.type;
 
 import yeti.lang.compiler.CompileException;
 import yeti.lang.compiler.YetiC;
+import yeti.lang.compiler.code.BindRef;
 import yeti.lang.compiler.parser.YetiParser;
 
 import java.util.*;
@@ -283,14 +284,18 @@ public class YetiType implements YetiParser {
     }
 
     public static class ClassBinding {
-        final YType type;
+        private final YType type;
 
-        ClassBinding(YType classType) {
+        protected ClassBinding(YType classType) {
             this.type = classType;
         }
 
         BindRef[] getCaptures() {
             return null;
+        }
+
+        public YType getType() {
+            return type;
         }
 
         // proxies - List<Closure>
@@ -312,13 +317,13 @@ public class YetiType implements YetiParser {
 
     static void limitDepth(YType type, int maxDepth) {
         type = type.deref();
-        if (type.type != VAR) {
+        if (type.getType() != VAR) {
             if (type.seen) {
                 return;
             }
             type.seen = true;
-            for (int i = type.param.length; --i >= 0;) {
-                limitDepth(type.param[i], maxDepth);
+            for (int i = type.getParam().length; --i >= 0;) {
+                limitDepth(type.getParam()[i], maxDepth);
             }
             type.seen = false;
         } else if (type.depth > maxDepth) {
@@ -519,7 +524,7 @@ public class YetiType implements YetiParser {
         }
     }
 
-    static void unifyToVar(YType var, YType from) throws TypeException {
+    public static void unifyToVar(YType var, YType from) throws TypeException {
         occursCheck(from, var);
         if ((var.flags & FL_ORDERED_REQUIRED) != 0)
             requireOrdered(from);
@@ -530,7 +535,7 @@ public class YetiType implements YetiParser {
         var.ref = from;
     }
 
-    static void unify(YType a, YType b) throws TypeException {
+    public static void unify(YType a, YType b) throws TypeException {
         a = a.deref();
         b = b.deref();
         if (a == b) {
@@ -706,7 +711,7 @@ public class YetiType implements YetiParser {
         return new ClassBinding(JavaType.typeOfClass(packageName, name));
     }
 
-    static YType resolveFullClass(String name, Scope scope) {
+    public static YType resolveFullClass(String name, Scope scope) {
         YType t = resolveClass(name, scope, false);
         return t == null ?
                 JavaType.typeOfClass(scope.ctx.packageName, name) : t;
@@ -758,8 +763,8 @@ public class YetiType implements YetiParser {
 
     private static final int RESTRICT_PROTECT = 1;
     private static final int RESTRICT_CONTRA  = 2;
-    static final int RESTRICT_ALL  = 4;
-    static final int RESTRICT_POLY = 8;
+    protected static final int RESTRICT_ALL  = 4;
+    protected static final int RESTRICT_POLY = 8;
 
     static void getFreeVar(List vars, List deny, YType type,
                            int flags, int depth) {

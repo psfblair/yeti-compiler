@@ -176,7 +176,7 @@ public class JavaSource implements Opcodes {
         if (!expect.equals(id)) {
             CompileException e = new CompileException(line, 0, "Expected `" +
                     expect + (id == null ? "EOF" : "', not `" + id + '\''));
-            e.fn = fn;
+            e.setFn(fn);
             throw e;
         }
     }

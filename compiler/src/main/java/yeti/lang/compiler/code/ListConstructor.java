@@ -59,7 +59,7 @@ final class ListConstructor extends Code implements CodeGen {
         return key;
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & STD_CONST) != 0 && (key != null || items.length == 0) ||
                (fl & EMPTY_LIST) != 0 && items.length == 0 ||
                (fl & LIST_RANGE) != 0 && items.length != 0

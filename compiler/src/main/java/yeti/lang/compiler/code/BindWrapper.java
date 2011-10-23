@@ -13,11 +13,11 @@ public final class BindWrapper extends BindRef {
         setOrigin(ref.getOrigin());
     }
 
-    protected CaptureWrapper capture() {
+    public CaptureWrapper capture() {
         return ref.capture();
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & (PURE | ASSIGN | DIRECT_BIND)) != 0 && ref.flagop(fl);
     }
 

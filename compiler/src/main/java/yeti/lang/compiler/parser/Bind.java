@@ -2,7 +2,7 @@ package yeti.lang.compiler.parser;
 
 import java.util.List;
 
-final class Bind extends Node {
+public final class Bind extends Node {
     String name;
     Node expr;
     TypeNode type;

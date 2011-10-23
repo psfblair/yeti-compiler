@@ -31,7 +31,7 @@
 
 package yeti.lang.compiler.parser;
 
-class XNode extends Node {
+public class XNode extends Node {
     Node[] expr;
 
     XNode(String kind) {
@@ -48,6 +48,10 @@ class XNode extends Node {
         this.expr = new Node[] { expr };
         setLine(expr.getLine());
         setCol(expr.getCol());
+    }
+
+    public Node[] getExpr() {
+        return expr;
     }
 
     String str() {

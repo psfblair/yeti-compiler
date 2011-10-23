@@ -72,7 +72,7 @@ public class ClassFinder {
         defined.put(name, content);
     }
 
-    boolean exists(String name) {
+    public boolean exists(String name) {
         if (parsed.containsKey(name))
             return true;
         Boolean known = (Boolean) existsCache.get(name);
@@ -100,7 +100,7 @@ public class ClassFinder {
         return found;
     }
 
-    JavaTypeReader readClass(String className) {
+    public JavaTypeReader readClass(String className) {
         JavaTypeReader t = new JavaTypeReader();
         t.setClassName(className);
         Object classNode = parsed.get(className);
@@ -119,7 +119,7 @@ public class ClassFinder {
         return t;
     }
 
-    static ClassFinder get() {
+    public static ClassFinder get() {
         return CompileCtx.current().getClassPath();
     }
 }

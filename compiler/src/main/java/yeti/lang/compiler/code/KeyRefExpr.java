@@ -16,7 +16,7 @@ final class KeyRefExpr extends Code implements CodeGen {
 
     public void gen(Ctx ctx) {
         val.gen(ctx);
-        if (ctx.compilation.isGCJ) {
+        if (ctx.getCompilation().isGCJ) {
             ctx.typeInsn(CHECKCAST, "yeti/lang/ByKey");
         }
         key.gen(ctx);
@@ -27,7 +27,7 @@ final class KeyRefExpr extends Code implements CodeGen {
 
     public void gen2(Ctx ctx, Code setValue, int _) {
         val.gen(ctx);
-        if (ctx.compilation.isGCJ) {
+        if (ctx.getCompilation().isGCJ) {
             ctx.typeInsn(CHECKCAST, "yeti/lang/ByKey");
         }
         key.gen(ctx);
@@ -38,7 +38,7 @@ final class KeyRefExpr extends Code implements CodeGen {
                 "Ljava/lang/Object;");
     }
 
-    protected Code assign(final Code setValue) {
+    public Code assign(final Code setValue) {
         return new SimpleCode(this, setValue, null, 0);
     }
 }

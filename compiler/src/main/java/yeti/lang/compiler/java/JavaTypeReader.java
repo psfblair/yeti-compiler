@@ -30,6 +30,22 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
         this.className = className;
     }
 
+    String[] getInterfaces() {
+        return interfaces;
+    }
+
+    void setInterfaces(String[] interfaces) {
+        this.interfaces = interfaces;
+    }
+
+    int getAccess() {
+        return access;
+    }
+
+    void setAccess(int access) {
+        this.access = access;
+    }
+
     public void visit(int version, int access, String name, String signature,
                       String superName, String[] interfaces) {
         if (superName != null)
@@ -80,8 +96,7 @@ public class JavaTypeReader implements ClassVisitor, Opcodes {
                             param.remove(i);
                         }
                     }*/
-                    t.param = (YType[])
-                        param.toArray(new YType[param.size()]);
+                    t.setParam((YType[]) param.toArray(new YType[param.size()]));
                 }
             } else if (s[p] == 'T') {
                 int p1 = p + 1;

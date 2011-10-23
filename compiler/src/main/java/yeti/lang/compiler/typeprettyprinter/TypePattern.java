@@ -6,7 +6,7 @@ import yeti.lang.compiler.yeti.type.YetiType;
 
 import java.util.*;
 
-class TypePattern {
+public class TypePattern {
     // Integer.MIN_VALUE is type end marker
     // Integer.MAX_VALUE matches any type
     private int[] idx;
@@ -31,7 +31,7 @@ class TypePattern {
             if (i >= 0)
                 return next[i];
         }
-        i = Arrays.binarySearch(idx, type.type);
+        i = Arrays.binarySearch(idx, type.getType());
         if (i < 0) {
             if (idx[i = idx.length - 1] != Integer.MAX_VALUE)
                 return null;
@@ -51,7 +51,7 @@ class TypePattern {
             // TODO check final/partial if necessary
             Map m = type.getFinalMembers();
             if (m == null)
-                m = type.partialMembers;
+                m = type.getPartialMembers();
             i = m.size();
             while (--i >= 0 && pat != null) {
                 if (pat.field == null)
@@ -158,13 +158,13 @@ class TypePattern {
         return presult;
     }
 
-    static TypePattern toPattern(Scope scope) {
+    public static TypePattern toPattern(Scope scope) {
         Map typedefs = new HashMap();
-        for (; scope != null; scope = scope.outer)
-            if (scope.typeDef != null) {
-                Object old = typedefs.put(scope.name, scope.typeDef);
+        for (; scope != null; scope = scope.getOuter())
+            if (scope.getTypeDef() != null) {
+                Object old = typedefs.put(scope.getName(), scope.getTypeDef());
                 if (old != null)
-                    typedefs.put(scope.name, old);
+                    typedefs.put(scope.getName(), old);
             }
         return toPattern(typedefs);
     }

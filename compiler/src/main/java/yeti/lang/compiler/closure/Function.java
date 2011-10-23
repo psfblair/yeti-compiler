@@ -74,7 +74,7 @@ public final class Function extends CapturingClosure implements Binder {
     private boolean shared;
     // Module has asked function to be a public (inner) class.
     // Useful for making Java code happy, if it wants to call the function.
-    boolean publish;
+    private boolean publish;
     // Function uses local bindings from its module. Published function
     // should ensure module initialisation in this case, when called.
     private boolean moduleInit;
@@ -82,7 +82,7 @@ public final class Function extends CapturingClosure implements Binder {
     boolean capture1;
 
     final BindRef arg = new BindRef() {
-        void gen(Ctx ctx) {
+        public void gen(Ctx ctx) {
             if (uncaptureArg != null) {
                 uncaptureArg.gen(ctx);
             } else {
@@ -95,7 +95,7 @@ public final class Function extends CapturingClosure implements Binder {
             }
         }
 
-        boolean flagop(int fl) {
+        public boolean flagop(int fl) {
             return (fl & PURE) != 0;
         }
     };
@@ -114,12 +114,16 @@ public final class Function extends CapturingClosure implements Binder {
         return name;
     }
 
+    public void setPublish(boolean publish) {
+        this.publish = publish;
+    }
+
     // uncaptures captured variables if possible
     // useful for function inlineing, don't work with self-refs
     boolean uncapture(Code arg) {
         if (selfRef != null || merged)
             return false;
-        for (Capture c = captures; c != null; c = c.next)
+        for (Capture c = getCaptures(); c != null; c = c.getNext())
             c.uncaptured = true;
         uncaptureArg = arg;
         return true;
@@ -159,7 +163,7 @@ public final class Function extends CapturingClosure implements Binder {
                 };
                 selfRef.setBinder(selfBind);
                 selfRef.setType(code.getType());
-                selfRef.ref = code;
+                selfRef.setRef(code);
 
                 // Right place for this should be outside of if (so it would
                 // be updated on multiple selfRefs), but allowing method-fun
@@ -168,7 +172,7 @@ public final class Function extends CapturingClosure implements Binder {
                 // and so these will be considered to be used as fun-values.
                 selfRef.setOrigin(code.getOrigin());
 
-                selfRef.capturer = this;
+                selfRef.setCapturer(this);
             }
             // selfRef.origin = code.origin;
             return selfRef;
@@ -177,7 +181,7 @@ public final class Function extends CapturingClosure implements Binder {
             return code;
         }
         Capture c = captureRef(code);
-        c.capturer = this;
+        c.setCapturer(this);
         //expecting max 2 merged
         if (outer != null && outer.merged &&
             (code == outer.selfRef || code == outer.arg)) {
@@ -200,7 +204,7 @@ public final class Function extends CapturingClosure implements Binder {
              * by selfRefs). Probable alternative would be to set it
              * when the copy code generation is skipped.
              */
-            c.localVar = 1; // really evil hack for tail-recursion.
+            c.setLocalVar(1); // really evil hack for tail-recursion.
             c.uncaptured = true;
         }
         return c;
@@ -210,15 +214,15 @@ public final class Function extends CapturingClosure implements Binder {
     void captureInit(Ctx fun, Capture c, int n) {
         if (methodImpl == null) {
             // c.getId() initialises the captures id as a side effect
-            fun.cw.visitField(0, c.getId(fun), c.captureType(),
-                              null, null).visitEnd();
+            fun.getClassWriter().visitField(0, c.getId(fun), c.captureType(),
+                    null, null).visitEnd();
         } else if (capture1) {
             assert (n == 0);
-            c.localVar = 0;
+            c.setLocalVar(0);
             fun.load(0).captureCast(c.captureType());
             fun.varInsn(ASTORE, 0);
         } else {
-            c.localVar = -2 - n;
+            c.setLocalVar(-2 - n);
         }
     }
 
@@ -247,16 +251,16 @@ public final class Function extends CapturingClosure implements Binder {
             for (Function f = this; f != methodImpl; f = (Function) f.body) {
                 // just to hold localVar
                 Capture tmp = new Capture();
-                tmp.localVar = ++argCounter;
+                tmp.setLocalVar(++argCounter);
                 f.argVar = argCounter; // merge fucks up the pre-last capture
                 captureMapping.put(f, tmp);
             }
             methodImpl.argVar = ++argCounter;
 
-            for (Capture c = captures; c != null; c = c.next)
+            for (Capture c = getCaptures(); c != null; c = c.getNext())
                 captureMapping.put(c.getBinder(), c);
             Capture tmp = new Capture();
-            tmp.localVar = 0;
+            tmp.setLocalVar(0);
             captureMapping.put(selfBind, tmp);
         }
 
@@ -280,17 +284,17 @@ public final class Function extends CapturingClosure implements Binder {
 
         // Hijack the inner functions capture mapping...
         if (captureMapping != null)
-            for (Capture c = methodImpl.captures; c != null; c = c.next) {
+            for (Capture c = methodImpl.getCaptures(); c != null; c = c.getNext()) {
                 Object mapped = captureMapping.get(c.getBinder());
                 if (mapped != null) {
-                    c.localVar = ((Capture) mapped).localVar;
-                    c.ignoreGet = c.localVar > 0;
+                    c.setLocalVar(((Capture) mapped).getLocalVar());
+                    c.ignoreGet = c.getLocalVar() > 0;
                 } else { // Capture was stealed away by direct bind?
                     Capture x = c;
-                    while (x.capturer != this && x.ref instanceof Capture)
-                        x = (Capture) x.ref;
+                    while (x.getCapturer() != this && x.getRef() instanceof Capture)
+                        x = (Capture) x.getRef();
                     if (x.uncaptured) {
-                        c.ref = x.ref;
+                        c.setRef(x.getRef());
                         c.uncaptured = true;
                     }
                 }
@@ -298,7 +302,7 @@ public final class Function extends CapturingClosure implements Binder {
 
         // Generate method body
         name = ctx.getClassName();
-        m.localVarCount = methodImpl.argVar + 1; // capturearray, args
+        m.setLocalVarCount(methodImpl.argVar + 1); // capturearray, args
         methodImpl.genClosureInit(m);
         m.visitLabel(methodImpl.restart = new Label());
         methodImpl.body.gen(m);
@@ -333,8 +337,7 @@ public final class Function extends CapturingClosure implements Binder {
 
         if (bindName == null)
             bindName = "";
-        name = ctx.compilation.createClassName(ctx,
-                        ctx.getClassName(), mangle(bindName));
+        name = ctx.getCompilation().createClassName(ctx, ctx.getClassName(), mangle(bindName));
 
         publish &= shared;
         String funClass =
@@ -343,8 +346,9 @@ public final class Function extends CapturingClosure implements Binder {
                                        : ACC_SUPER | ACC_FINAL,
                                name, funClass, null);
 
-        if (publish)
+        if (publish) {
             fun.markInnerClass(ctx, ACC_PUBLIC | ACC_STATIC | ACC_FINAL);
+        }
         mergeCaptures(fun, false);
         fun.createInit(shared ? ACC_PRIVATE : 0, funClass);
 
@@ -353,7 +357,7 @@ public final class Function extends CapturingClosure implements Binder {
                 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
             : fun.newMethod(ACC_PUBLIC + ACC_FINAL, "apply",
                 "(Ljava/lang/Object;)Ljava/lang/Object;");
-        apply.localVarCount = argVar + 1; // this, arg
+        apply.setLocalVarCount(argVar + 1); // this, arg
         
         if (argCaptures != null) {
             // Tail recursion needs all args to be in local registers
@@ -362,7 +366,7 @@ public final class Function extends CapturingClosure implements Binder {
                 Capture c = argCaptures[i];
                 if (c != null && !c.uncaptured) {
                     c.gen(apply);
-                    c.localVar = apply.getLocalVarCount();
+                    c.setLocalVar(apply.getLocalVarCount());
                     c.ignoreGet = true;
                     apply.varInsn(ASTORE, apply.getLocalVarCount());
                     apply.incrementLocalVarCountBy(1);
@@ -387,8 +391,8 @@ public final class Function extends CapturingClosure implements Binder {
         valueCtx.insn(DUP);
         valueCtx.visitInit(name, "()V");
         if (shared) {
-            fun.cw.visitField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL,
-                              "_", "Lyeti/lang/Fun;", null, null).visitEnd();
+            fun.getClassWriter().visitField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL,
+                    "_", "Lyeti/lang/Fun;", null, null).visitEnd();
             valueCtx.fieldInsn(PUTSTATIC, name, "_", "Lyeti/lang/Fun;");
             valueCtx.insn(RETURN);
             valueCtx.closeMethod();
@@ -403,7 +407,7 @@ public final class Function extends CapturingClosure implements Binder {
         boolean meth = methodImpl != null;
         int counter = -1;
         // Capture a closure
-        for (Capture c = captures; c != null; c = c.next) {
+        for (Capture c = getCaptures(); c != null; c = c.getNext()) {
             if (c.uncaptured)
                 continue;
             if (capture1) {
@@ -417,32 +421,31 @@ public final class Function extends CapturingClosure implements Binder {
                 ctx.insn(AASTORE);
             } else {
                 c.captureGen(ctx);
-                ctx.fieldInsn(PUTFIELD, name, c.id, c.captureType());
+                ctx.fieldInsn(PUTFIELD, name, c.getId(), c.captureType());
             }
         }
         ctx.forceType(meth ? "[Ljava/lang/Object;" : "yeti/lang/Fun");
     }
 
-    boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return merged ? ((Function) body).flagop(fl) :
-                (fl & (PURE | CONST)) != 0 && (shared || captures == null);
+                (fl & (PURE | CONST)) != 0 && (shared || getCaptures() == null);
     }
 
     // Check whether all captures are actually static constants.
     // If so, the function value should also be optimised into shared constant.
-    boolean prepareConst(Ctx ctx) {
+    public boolean prepareConst(Ctx ctx) {
         if (shared) // already optimised into static constant value
             return true;
 
         BindExpr bindExpr = null;
         // First try determine if we can reduce into method.
         if (selfBind instanceof BindExpr &&
-                (bindExpr = (BindExpr) selfBind).evalId == -1 &&
-                bindExpr.result != null) {
+                (bindExpr = (BindExpr) selfBind).getEvalId() == -1 && bindExpr.getResult() != null) {
             int arityLimit = 99999999;
-            for (BindExpr.Ref i = bindExpr.refs; i != null; i = i.next) {
-                if (arityLimit > i.arity)
-                    arityLimit = i.arity;
+            for (BindExpr.Ref i = bindExpr.getRefs(); i != null; i = i.getNext()) {
+                if (arityLimit > i.getArity())
+                    arityLimit = i.getArity();
             }
             int arity = 0;
             Function impl = this;
@@ -458,7 +461,7 @@ public final class Function extends CapturingClosure implements Binder {
                 //System.err.println("FF " + arity + " " + arityLimit +
                 //                   " " + bindName);
                 if (merged) { // steal captures and unmerge :)
-                    captures = ((Function) body).captures;
+                    setCaptures(((Function) body).getCaptures());
                     merged = false;
                 }
                 methodImpl = impl.merged ? impl.outer : impl;
@@ -486,13 +489,13 @@ public final class Function extends CapturingClosure implements Binder {
         // Uncapture the direct bindings.
         Capture prev = null;
         int liveCaptures = 0;
-        for (Capture c = captures; c != null; c = c.next)
-            if (c.ref.flagop(DIRECT_BIND)) {
+        for (Capture c = getCaptures(); c != null; c = c.getNext())
+            if (c.getRef().flagop(DIRECT_BIND)) {
                 c.uncaptured = true;
                 if (prev == null)
-                    captures = c.next;
+                    setCaptures(c.getNext());
                 else
-                    prev.next = c.next;
+                    prev.setNext(c.getNext());
             } else {
                 // Why in the hell are existing uncaptured ones preserved?
                 // Does some checks them (selfref, args??) after prepareConst?
@@ -515,7 +518,7 @@ public final class Function extends CapturingClosure implements Binder {
         return liveCaptures == 0;
     }
 
-    void gen(Ctx ctx) {
+    public void gen(Ctx ctx) {
         if (shared) {
             if (methodImpl == null)
                 ctx.fieldInsn(GETSTATIC, name, "_", "Lyeti/lang/Fun;");

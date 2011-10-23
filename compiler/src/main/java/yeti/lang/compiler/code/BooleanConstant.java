@@ -11,7 +11,7 @@ final class BooleanConstant extends BindRef {
         this.val = val;
     }
 
-    protected boolean flagop(int fl) {
+    public boolean flagop(int fl) {
         return (fl & STD_CONST) != 0;
     }
 
@@ -20,7 +20,7 @@ final class BooleanConstant extends BindRef {
                 val ? "TRUE" : "FALSE", "Ljava/lang/Boolean;");
     }
 
-    void genIf(Ctx ctx, Label to, boolean ifTrue) {
+    public void genIf(Ctx ctx, Label to, boolean ifTrue) {
         if (val == ifTrue) {
             ctx.jumpInsn(GOTO, to);
         }

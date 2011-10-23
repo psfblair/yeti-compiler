@@ -37,8 +37,8 @@ import yeti.lang.compiler.code.Ctx;
 public abstract class CapturingClosure extends AClosure {
     private Capture captures;
 
-    Capture captureRef(BindRef code) {
-        for (Capture c = captures; c != null; c = c.next)
+    protected Capture captureRef(BindRef code) {
+        for (Capture c = getCaptures(); c != null; c = c.getNext())
             if (c.getBinder() == code.getBinder()) {
                 // evil hack... ref sharing broke fun-method
                 // optimisation accounting of ref usage
@@ -49,11 +49,11 @@ public abstract class CapturingClosure extends AClosure {
         c.setBinder(code.getBinder());
         c.setType(code.getType());
         c.setPolymorph(code.isPolymorph());
-        c.ref = code;
-        c.wrapper = code.capture();
+        c.setRef(code);
+        c.setWrapper(code.capture());
         c.setOrigin(code.getOrigin());
-        c.next = captures;
-        captures = c;
+        c.setNext(getCaptures());
+        setCaptures(c);
         return c;
     }
 
@@ -61,9 +61,14 @@ public abstract class CapturingClosure extends AClosure {
         return code.flagop(DIRECT_BIND) ? code : captureRef(code);
     }
 
-    public Capture getCaptures() {
+    protected Capture getCaptures() {
         return captures;
     }
+
+    void setCaptures(Capture captures) {
+        this.captures = captures;
+    }
+
 
     // Called by mergeCaptures to initialize a capture.
     // It must be ok to copy capture after that.
@@ -72,27 +77,27 @@ public abstract class CapturingClosure extends AClosure {
     // mergeCaptures seems to drop only some uncaptured ones
     // (looks like because so is easy to do, currently
     // this seems to cause extra check only in Function.finishGen).
-    int mergeCaptures(Ctx ctx, boolean cleanup) {
+    protected int mergeCaptures(Ctx ctx, boolean cleanup) {
         int counter = 0;
         Capture prev = null;
     next_capture:
-        for (Capture c = captures; c != null; c = c.next) {
+        for (Capture c = captures; c != null; c = c.getNext()) {
             Object identity = c.identity = c.captureIdentity();
-            if (cleanup && (c.uncaptured || c.ref.flagop(DIRECT_BIND))) {
+            if (cleanup && (c.uncaptured || c.getRef().flagop(DIRECT_BIND))) {
                 c.uncaptured = true;
                 if (prev == null)
-                    captures = c.next;
+                    captures = c.getNext();
                 else
-                    prev.next = c.next;
+                    prev.setNext(c.getNext());
             }
             if (c.uncaptured)
                 continue;
             // remove shared captures
-            for (Capture i = captures; i != c; i = i.next) {
+            for (Capture i = captures; i != c; i = i.getNext()) {
                 if (i.identity == identity) {
-                    c.id = i.id; // copy old one's id
+                    c.setId(i.getId()); // copy old one's id
                     c.localVar = i.localVar;
-                    prev.next = c.next;
+                    prev.setNext(c.getNext());
                     continue next_capture;
                 }
             }

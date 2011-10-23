@@ -15,15 +15,23 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
 
     private boolean assigned;
     private boolean captured;
-    Ref refs;
-    int evalId = -1;
+    private Ref refs;
+    private int evalId = -1;
     private boolean directBind;
     private String directField;
     private String myClass;
 
+    public Ref getRefs() {
+        return refs;
+    }
+
+    public int getEvalId() {
+        return evalId;
+    }
+
     public class Ref extends BindRef {
         private int arity;
-        Ref next;
+        private Ref next;
 
         public void gen(Ctx ctx) {
             if (directBind) {
@@ -34,11 +42,19 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             }
         }
 
+        public int getArity() {
+            return arity;
+        }
+
         public void setArity(int arity) {
             this.arity = arity;
         }
 
-        protected Code assign(final Code value) {
+        public Ref getNext() {
+            return next;
+        }
+
+        public Code assign(final Code value) {
             if (!var) {
                 return null;
             }
@@ -51,7 +67,7 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             };
         }
 
-        protected boolean flagop(int fl) {
+        public boolean flagop(int fl) {
             if ((fl & ASSIGN) != 0)
                 return var ? assigned = true : false;
             if ((fl & CONST) != 0)
@@ -63,7 +79,7 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             return (fl & PURE) != 0 && !var;
         }
 
-        CaptureWrapper capture() {
+        public CaptureWrapper capture() {
             captured = true;
             return var ? BindExpr.this : null;
         }
@@ -72,7 +88,7 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             return force || directBind ? getSt() : null;
         }
 
-        void forceDirect() {
+        public void forceDirect() {
             directField = "";
         }
     }
@@ -87,11 +103,11 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
         //if (res == null)
         Ref res = new Ref();
         res.setBinder(this);
-        res.type = getSt().type;
-        res.polymorph = !var && getSt().polymorph;
+        res.setType(getSt().getType());
+        res.setPolymorph(!var && getSt().isPolymorph());
         res.next = refs;
         if (getSt() instanceof Function)
-            res.origin = res;
+            res.setOrigin(res);
         return refs = res;
     }
 
@@ -169,14 +185,14 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
     }
     
     // called by Function.prepareConst when this bastard mutates into method
-    void setCaptureType(String type) {
+    public void setCaptureType(String type) {
         javaDescr = javaType = "[Ljava/lang/Object;";
         javaType = type;
         javaDescr = type.charAt(0) == '[' ? type : 'L' + type + ';';
     }
 
     void genBind(Ctx ctx) {
-        setCaptureType(javaType(getSt().type));
+        setCaptureType(javaType(getSt().getType()));
         if (ctx == null)
             return; // named lambdas use genBind for initializing the expr
         if (!var && getSt().prepareConst(ctx) && evalId == -1) {
@@ -184,11 +200,11 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
             return;
         }
         if (directField == "") {
-            myClass = ctx.className;
-            directField = "$".concat(Integer.toString(ctx.constants.ctx.getFieldCounter()));
-            ctx.constants.ctx.incrementFieldCounterBy(1);
-            ctx.cw.visitField(ACC_STATIC | ACC_SYNTHETIC, directField,
-                              javaDescr, null, null).visitEnd();
+            myClass = ctx.getClassName();
+            directField = "$".concat(Integer.toString(ctx.getConstants().ctx.getFieldCounter()));
+            ctx.getConstants().ctx.incrementFieldCounterBy(1);
+            ctx.getClassWriter().visitField(ACC_STATIC | ACC_SYNTHETIC, directField,
+                    javaDescr, null, null).visitEnd();
         } else if (mvar == -1) {
             id = ctx.getLocalVarCount();
             ctx.incrementFieldCounterBy(1);
@@ -208,12 +224,12 @@ public final class BindExpr extends SeqExpr implements Binder, CaptureWrapper {
 
     public void gen(Ctx ctx) {
         genBind(ctx);
-        result.gen(ctx);
+        getResult().gen(ctx);
     }
 
-    void genIf(Ctx ctx, Label to, boolean ifTrue) {
+    public void genIf(Ctx ctx, Label to, boolean ifTrue) {
         genBind(ctx);
-        result.genIf(ctx, to, ifTrue);
+        getResult().genIf(ctx, to, ifTrue);
     }
 }
 
